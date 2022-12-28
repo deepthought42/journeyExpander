@@ -25,3 +25,8 @@ hs_err_pid*
 *.json
 
 *.properties
+/target/
+
+.settings/
+
+*.prod

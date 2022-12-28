@@ -19,6 +19,7 @@ package com.looksee.journeyExpander;
 // [START run_pubsub_handler]
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.looksee.journeyExpander.models.enums.Action;
@@ -95,7 +97,11 @@ public class AuditController {
 	public ResponseEntity receiveMessage(@RequestBody Body body) 
 			throws JsonMappingException, JsonProcessingException, ExecutionException, InterruptedException 
 	{
-		VerifiedJourneyMessage journey_msg = (VerifiedJourneyMessage) body.getMessage();
+		Body.Message message = body.getMessage();
+		String data = message.getData();
+	    String target = !data.isEmpty() ? new String(Base64.getDecoder().decode(data)) : "";
+	    ObjectMapper input_mapper = new ObjectMapper();
+	    VerifiedJourneyMessage journey_msg = input_mapper.readValue(target, VerifiedJourneyMessage.class);
 	    log.warn("message " + journey_msg);
 	    
 	    Journey journey = journey_msg.getJourney();
