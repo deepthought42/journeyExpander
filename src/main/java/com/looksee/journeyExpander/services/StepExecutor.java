@@ -4,7 +4,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.looksee.browsing.ActionFactory;
@@ -14,10 +13,8 @@ import com.looksee.journeyExpander.models.journeys.Step;
 
 @Service
 public class StepExecutor {
+	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(StepExecutor.class);
-
-	@Autowired
-	private StepService step_service;
 	
 	public void execute(Browser browser, Step step) {
 		assert browser != null;

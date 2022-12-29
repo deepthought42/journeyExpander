@@ -10,12 +10,12 @@ public class DiscardedJourneyMessage {
 	private long accountId;
 	private long auditRecordId;
    
-	public DiscardedJourneyMessage(int id, 
+	public DiscardedJourneyMessage(int journeyId, 
 								   BrowserType browserType, 
 								   long domainId, 
 								   long accountId, 
 								   long auditRecordId) {
-		setId(id);
+		setId(journeyId);
 		setBrowserType(browserType);
 		setDomainId(domainId);
 		setAccountId(accountId);
