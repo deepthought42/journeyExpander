@@ -19,7 +19,6 @@ public class PageAuditRecord extends AuditRecord {
 	@Relationship(type = "FOR")
 	private PageState page_state;
 	
-	private String status;
 	private long elements_found;
 	private long elements_reviewed;
 	
@@ -73,15 +72,7 @@ public class PageAuditRecord extends AuditRecord {
 	public void addAudits(Set<Audit> audits) {
 		this.audits.addAll( audits );
 	}
-
-	public ExecutionStatus getStatus() {
-		return ExecutionStatus.create(status);
-	}
-
-	public void setStatus(ExecutionStatus status) {
-		this.status = status.getShortName();
-	}
-
+	
 	public PageState getPageState() {
 		return page_state;
 	}
