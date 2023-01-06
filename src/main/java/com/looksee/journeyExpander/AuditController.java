@@ -112,7 +112,6 @@ public class AuditController {
 											 "", 
 											 null);
 					
-					//TODO : This check should move to JourneyExecutor to prevent duplication
 					if(existsInJourney(journey, step)) {
 						continue;
 					}
@@ -128,11 +127,9 @@ public class AuditController {
 					Journey new_journey = new Journey(steps, ordered_ids);
 					
 					//add journey to list of elements to explore for click or typing interactions
-					//getSender().tell(new_journey, getSelf());
 					JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 					String journey_json = mapper.writeValueAsString(new_journey);
 					log.warn("audit progress update = "+journey_json);
-					//TODO: SEND PUB SUB MESSAGE THAT AUDIT RECORD NOT FOUND WITH PAGE DATA EXTRACTION MESSAGE
 				    journey_candidate_topic.publish(journey_json);
 				    interactive_elements.add(leaf_element.getKey());
 				}
@@ -151,7 +148,6 @@ public class AuditController {
 				JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 				String journey_json = mapper.writeValueAsString(journey);
 				log.warn("audit progress update = "+journey_json);
-				//TODO: SEND PUB SUB MESSAGE THAT AUDIT RECORD NOT FOUND WITH PAGE DATA EXTRACTION MESSAGE
 			    pubSubErrorPublisherImpl.publish(journey_json);
 			}
 		}while(!executed_successfully && cnt < 50);
