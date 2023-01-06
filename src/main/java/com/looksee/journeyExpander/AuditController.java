@@ -96,99 +96,50 @@ public class AuditController {
 		do {
 			try {
 				//start a new browser session
-				//browser = BrowserConnectionHelper.getConnection(BrowserType.CHROME, BrowserEnvironment.DISCOVERY);
-				//ActionFactory action_factory = new ActionFactory(browser.getDriver());
-
-				//log.warn("journey :: "+journey);
-				//log.warn("browser :: "+browser);
-				//executeJourney(journey, browser);
-				//String current_url = browser.getDriver().getCurrentUrl();
-				//log.warn("CURRENT URL   ::    "+current_url);
-				//construct page and add page to list of page states
-				//URL page_url = new URL(current_url);							
-
-				//build page state for baseline
-				//PageState journey_result_page = browser_service.buildPageState(page_url);
-				//journey_result_page = page_state_service.save(journey_result_page);
-				//domain_service.addPage(domain.getId(), journey_result_page.getKey());
-
-				//Document doc = Jsoup.parse(journey_result_page.getSrc());
-				
 				PageState journey_result_page = journey.getSteps().get(journey.getSteps().size()-1).getEndPage();
 				//get all leaf elements 
 				List<ElementState> leaf_elements = page_state_service.getVisibleLeafElements(journey_result_page.getKey());
 				
 				for(ElementState leaf_element : leaf_elements) {
-					
-					//check each leaf element for mouseover interaction
-					//WebElement web_element = browser.getDriver().findElement(By.xpath(leaf_element.getXpath()));
-					//action_factory.execAction(web_element, "", Action.MOUSE_OVER);
-
-					//Element element = Xsoup.compile(leaf_element.getXpath()).evaluate(doc).getElements().get(0);
-					//String css_selector = "";//generateXpathUsingJsoup(element, doc, attributes, xpath_cnt);
-
-					/*
-					ElementState new_element_state = BrowserService.buildElementState(
-																		leaf_element.getXpath(), 
-																		browser.extractAttributes(web_element), 
-																		element,
-																		web_element, 
-																		leaf_element.getClassification(), 
-																		Browser.loadCssProperties(web_element, 
-																		browser.getDriver()),
-																		"",
-																		css_selector);
-					
-					new_element_state = element_state_service.save(new_element_state);
-					 */
-					//if page url is not the same as journey result page url then load new page for this
-					//construct page and add page to list of page states
-					
-					//PageState exploration_result_page = browser_service.buildPageState(browser);
-					//log.warn("Page state built in journey explorer");
-
 					log.warn("journey result page key :: "+journey_result_page.getKey());
 					log.warn("journey result matches exploration result?   " + journey_result_page.equals(null));
 					//check if page state is same as original page state. If not then add new ElementInteractionStep 
-					//if(!journey_result_page.equals(exploration_result_page)) {
-					//	exploration_result_page = page_state_service.save(exploration_result_page);
-						
-						log.warn("creating new element interaction step .... "+leaf_element);
-						Step step = new SimpleStep(journey_result_page, 
-												 leaf_element, 
-												 Action.MOUSE_OVER, 
-												 "", 
-												 null);
-						
-						//TODO : This check should move to JourneyExecutor to prevent duplication
-						if(existsInJourney(journey, step)) {
-							continue;
-						}
-						//step = step_service.save(step);
-						//add element back to service step
-						//clone journey and add this step at the end
-						List<Step> steps = new ArrayList<>(journey.getSteps());
-						steps.add(step);
-						
-						List<Long> ordered_ids = new ArrayList<>(journey.getOrderedIds());
-						ordered_ids.add(step.getId());
-						
-						Journey new_journey = new Journey(steps, ordered_ids);
-						
-						//add journey to list of elements to explore for click or typing interactions
-						//getSender().tell(new_journey, getSelf());
-						JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
-						String journey_json = mapper.writeValueAsString(new_journey);
-						log.warn("audit progress update = "+journey_json);
-						//TODO: SEND PUB SUB MESSAGE THAT AUDIT RECORD NOT FOUND WITH PAGE DATA EXTRACTION MESSAGE
-					    journey_candidate_topic.publish(journey_json);
-					    interactive_elements.add(leaf_element.getKey());
+					
+					log.warn("creating new element interaction step .... "+leaf_element);
+					Step step = new SimpleStep(journey_result_page, 
+											 leaf_element, 
+											 Action.MOUSE_OVER, 
+											 "", 
+											 null);
+					
+					//TODO : This check should move to JourneyExecutor to prevent duplication
+					if(existsInJourney(journey, step)) {
+						continue;
 					}
-				//}
+					//step = step_service.save(step);
+					//add element back to service step
+					//clone journey and add this step at the end
+					List<Step> steps = new ArrayList<>(journey.getSteps());
+					steps.add(step);
+					
+					List<Long> ordered_ids = new ArrayList<>(journey.getOrderedIds());
+					ordered_ids.add(step.getId());
+					
+					Journey new_journey = new Journey(steps, ordered_ids);
+					
+					//add journey to list of elements to explore for click or typing interactions
+					//getSender().tell(new_journey, getSelf());
+					JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+					String journey_json = mapper.writeValueAsString(new_journey);
+					log.warn("audit progress update = "+journey_json);
+					//TODO: SEND PUB SUB MESSAGE THAT AUDIT RECORD NOT FOUND WITH PAGE DATA EXTRACTION MESSAGE
+				    journey_candidate_topic.publish(journey_json);
+				    interactive_elements.add(leaf_element.getKey());
+				}
 
 				log.warn("sending "+hover_interactions.size()+ " hover interactions to Journey Manager +++");
 				executed_successfully = true;
-				break;
+				return new ResponseEntity<String>("Successfully generated journey expansions", HttpStatus.OK);
 			}
 			catch(Exception e) {
 				log.warn("Exception occurred while executing journey ::   "+e.getMessage());
@@ -203,11 +154,10 @@ public class AuditController {
 				//TODO: SEND PUB SUB MESSAGE THAT AUDIT RECORD NOT FOUND WITH PAGE DATA EXTRACTION MESSAGE
 			    pubSubErrorPublisherImpl.publish(journey_json);
 			}
-			//TimingUtils.pauseThread(15000L);
 		}while(!executed_successfully && cnt < 50);
 		
-	
-		return new ResponseEntity("Successfully generated journey expansions", HttpStatus.OK);
+		return new ResponseEntity<String>("Error occurred while expanding journey", HttpStatus.INTERNAL_SERVER_ERROR);
+
 	}
 	
 	private boolean existsInJourney(Journey journey, Step step) {
