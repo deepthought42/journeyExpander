@@ -8,8 +8,8 @@ import java.util.Set;
  */
 public class Score {
 
-	private int points_achieved;
-	private int max_possible_points;
+	private int pointsAchieved;
+	private int maxPossiblePoints;
 	private Set<UXIssueMessage> messages;
 	
 	public Score(int points, int max_points, Set<UXIssueMessage> issue_messages) {
@@ -19,16 +19,16 @@ public class Score {
 	}
 	
 	public int getPointsAchieved() {
-		return points_achieved;
+		return pointsAchieved;
 	}
 	public void setPointsAchieved(int points_achieved) {
-		this.points_achieved = points_achieved;
+		this.pointsAchieved = points_achieved;
 	}
 	public int getMaxPossiblePoints() {
-		return max_possible_points;
+		return maxPossiblePoints;
 	}
 	public void setMaxPossiblePoints(int max_possible_points) {
-		this.max_possible_points = max_possible_points;
+		this.maxPossiblePoints = max_possible_points;
 	}
 
 	public Set<UXIssueMessage> getIssueMessages() {

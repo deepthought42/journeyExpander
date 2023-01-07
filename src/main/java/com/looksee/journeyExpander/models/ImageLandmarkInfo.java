@@ -10,7 +10,7 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 public class ImageLandmarkInfo extends LookseeObject{
 	
 	@Relationship(type="EXISTS_AT")
-	private Set<LatLng> lat_lng;
+	private Set<LatLng> latLng;
 	private String description;
 	private double score;
 	
@@ -27,10 +27,10 @@ public class ImageLandmarkInfo extends LookseeObject{
 	}
 	
 	public Set<LatLng> getLatLngSet() {
-		return lat_lng;
+		return latLng;
 	}
 	public void setLatLngSet(Set<LatLng> lat_lng) {
-		this.lat_lng = lat_lng;
+		this.latLng = lat_lng;
 	}
 	public double getScore() {
 		return score;

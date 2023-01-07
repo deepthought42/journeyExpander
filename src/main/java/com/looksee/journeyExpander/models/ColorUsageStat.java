@@ -6,7 +6,7 @@ public class ColorUsageStat {
 	private float green;
 	private float blue;
 
-	private double pixel_percent;
+	private double pixelPercent;
 	private float score;
 	
 	public ColorUsageStat(float red, float green, float blue, double pixel_percent, float score) {
@@ -42,11 +42,11 @@ public class ColorUsageStat {
 	}
 
 	public double getPixelPercent() {
-		return pixel_percent;
+		return pixelPercent;
 	}
 
 	public void setPixelPercent(double pixel_percent) {
-		this.pixel_percent = pixel_percent;
+		this.pixelPercent = pixel_percent;
 	}
 
 	public float getScore() {

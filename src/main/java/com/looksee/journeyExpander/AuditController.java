@@ -72,12 +72,14 @@ public class AuditController {
 	private StepExecutor step_executor;
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
-	public ResponseEntity receiveMessage(@RequestBody Body body) 
+	public ResponseEntity<String> receiveMessage(@RequestBody Body body) 
 			throws JsonMappingException, JsonProcessingException, ExecutionException, InterruptedException 
 	{
 		Body.Message message = body.getMessage();
 		String data = message.getData();
 	    String target = !data.isEmpty() ? new String(Base64.getDecoder().decode(data)) : "";
+	    
+	    log.warn("data value :: "+target);
 	    ObjectMapper input_mapper = new ObjectMapper();
 	    VerifiedJourneyMessage journey_msg = input_mapper.readValue(target, VerifiedJourneyMessage.class);
 
@@ -95,11 +97,20 @@ public class AuditController {
 		Browser browser = null;
 		do {
 			try {
+				boolean page_needs_extraction = false;
 				//start a new browser session
 				PageState journey_result_page = journey.getSteps().get(journey.getSteps().size()-1).getEndPage();
+				log.warn("journey result page = "+journey_result_page);
+				if(journey_result_page == null) {
+					journey_result_page = journey.getSteps().get(journey.getSteps().size()-1).getStartPage();
+					log.warn("journey last step start page = "+journey_result_page);
+					page_needs_extraction = true;
+				}
 				//get all leaf elements 
-				List<ElementState> leaf_elements = page_state_service.getVisibleLeafElements(journey_result_page.getKey());
-				
+				log.warn("total elements = "+journey_result_page.getElements());
+				log.warn("total elements = "+journey_result_page.getElements().size());
+				List<ElementState> leaf_elements = page_state_service.getVisibleLeafElements(journey_result_page.getId());
+				log.warn(leaf_elements.size()+" leaf elements found");
 				for(ElementState leaf_element : leaf_elements) {
 					log.warn("journey result page key :: "+journey_result_page.getKey());
 					log.warn("journey result matches exploration result?   " + journey_result_page.equals(null));
@@ -119,10 +130,17 @@ public class AuditController {
 					//add element back to service step
 					//clone journey and add this step at the end
 					List<Step> steps = new ArrayList<>(journey.getSteps());
-					steps.add(step);
-					
 					List<Long> ordered_ids = new ArrayList<>(journey.getOrderedIds());
-					ordered_ids.add(step.getId());
+					
+					if(page_needs_extraction) {
+						steps.set(steps.size()-1, step);
+						ordered_ids.set(ordered_ids.size()-1, step.getId());
+					}
+					else {
+						steps.add(step);
+						ordered_ids.add(step.getId());
+					}
+					
 					
 					Journey new_journey = new Journey(steps, ordered_ids);
 					
@@ -139,7 +157,7 @@ public class AuditController {
 				return new ResponseEntity<String>("Successfully generated journey expansions", HttpStatus.OK);
 			}
 			catch(Exception e) {
-				log.warn("Exception occurred while executing journey ::   "+e.getMessage());
+				log.warn("Exception occurred while expanding journey ::   "+e.getMessage());
 				e.printStackTrace();
 				if(browser != null) {
 					browser.close();

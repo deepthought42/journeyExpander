@@ -18,7 +18,7 @@ public class Journey extends LookseeObject {
 	@Relationship(type = "HAS")
 	private List<Step> steps;
 	
-	private List<Long> ordered_ids;
+	private List<Long> orderedIds;
 	
 	public Journey() {
 		setSteps(new ArrayList<>());
@@ -47,7 +47,7 @@ public class Journey extends LookseeObject {
 	 */
 	@Override
 	public String generateKey() {
-		return "journey"+org.apache.commons.codec.digest.DigestUtils.sha256Hex(StringUtils.join(ordered_ids, "|"));
+		return "journey"+org.apache.commons.codec.digest.DigestUtils.sha256Hex(StringUtils.join(orderedIds, "|"));
 	}
 
 	/**
@@ -71,10 +71,10 @@ public class Journey extends LookseeObject {
 	}
 	
 	public List<Long> getOrderedIds() {
-		return ordered_ids;
+		return orderedIds;
 	}
 	
 	public void setOrderedIds(List<Long> ordered_ids) {
-		this.ordered_ids = ordered_ids;
+		this.orderedIds = ordered_ids;
 	}
 }

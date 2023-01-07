@@ -15,16 +15,16 @@ import com.looksee.journeyExpander.models.TestUser;
 public class LoginStep extends Step {
 
 	@Relationship(type = "USES")
-	private TestUser test_user;
+	private TestUser testUser;
 	
 	@Relationship(type = "USERNAME_INPUT")
-	private ElementState username_element;
+	private ElementState usernameElement;
 	
 	@Relationship(type = "PASSWORD_INPUT")
-	private ElementState password_element;
+	private ElementState passwordElement;
 	
 	@Relationship(type = "SUBMIT")
-	private ElementState submit_element;
+	private ElementState submitElement;
 
 	public LoginStep() {}
 	
@@ -45,36 +45,36 @@ public class LoginStep extends Step {
 	
 	
 	public ElementState getUsernameElement() {
-		return username_element;
+		return usernameElement;
 	}
 	
 	public void setUsernameElement(ElementState username_input) {
-		this.username_element = username_input;
+		this.usernameElement = username_input;
 	}
 	
 	public ElementState getPasswordElement() {
-		return password_element;
+		return passwordElement;
 	}
 	
 	public void setPasswordElement(ElementState password_input) {
-		this.password_element = password_input;
+		this.passwordElement = password_input;
 	}
 	
 	public TestUser getTestUser() {
-		return test_user;
+		return testUser;
 	}
 	
 	public void setTestUser(TestUser user) {
-		this.test_user = user;
+		this.testUser = user;
 	}
 	
 
 	public ElementState getSubmitElement() {
-		return submit_element;
+		return submitElement;
 	}
 
 	public void setSubmitElement(ElementState submit_element) {
-		this.submit_element = submit_element;
+		this.submitElement = submit_element;
 	}
 
 	@Override
@@ -86,17 +86,17 @@ public class LoginStep extends Step {
 		if(getEndPage() != null) {
 			key += getEndPage().getId();
 		}
-		if(username_element != null) {
-			key += username_element.getId();
+		if(usernameElement != null) {
+			key += usernameElement.getId();
 		}
-		if(password_element != null) {
-			key += password_element.getId();
+		if(passwordElement != null) {
+			key += passwordElement.getId();
 		}
-		if(submit_element != null) {
-			key += submit_element.getId();
+		if(submitElement != null) {
+			key += submitElement.getId();
 		}
-		if(test_user != null) {
-			key += test_user.getId();
+		if(testUser != null) {
+			key += testUser.getId();
 		}
 		return "loginstep"+key;
 	}

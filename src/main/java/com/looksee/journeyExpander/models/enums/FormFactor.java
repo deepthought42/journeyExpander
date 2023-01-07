@@ -25,7 +25,7 @@ public enum FormFactor {
             throw new IllegalArgumentException();
         }
         for(FormFactor v : values()) {
-            if(value.equals(v.getShortName())) {
+            if(value.equalsIgnoreCase(v.getShortName())) {
                 return v;
             }
         }

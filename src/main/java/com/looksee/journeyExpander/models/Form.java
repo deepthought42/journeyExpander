@@ -3,6 +3,7 @@ package com.looksee.journeyExpander.models;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.neo4j.core.schema.Relationship;
@@ -18,22 +19,22 @@ public class Form extends LookseeObject{
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(Form.class);
 
-	private Long memory_id;
+	private Long memoryId;
 	private String name;
     
 	private String type;
 	
 	@Relationship(type = "HAS")
-	private List<BugMessage> bug_messages;
+	private List<BugMessage> bugMessages;
 	
 	@Relationship(type = "DEFINED_BY")
-	private ElementState form_tag;
+	private ElementState formTag;
 	
 	@Relationship(type = "HAS")
-	private List<ElementState> form_fields;
+	private List<ElementState> formFields;
 	
 	@Relationship(type = "HAS_SUBMIT")
-	private ElementState submit_field;
+	private ElementState submitField;
 	
 	public Form(){	}
 	
@@ -66,7 +67,7 @@ public class Form extends LookseeObject{
 	 * @return {@link FormType}
 	 */
 	private FormType determineFormType(){
-		Map<String, String> attributes = this.form_tag.getAttributes();
+		Map<String, String> attributes = this.formTag.getAttributes();
 		for(String attr: attributes.keySet()){
 			String vals = attributes.get(attr);
 			if(vals.contains("register") || (vals.contains("sign") && vals.contains("up"))){
@@ -87,21 +88,21 @@ public class Form extends LookseeObject{
 		}
 		
 
-		if(submit_field != null && (submit_field.getAllText().toLowerCase().contains("login") 
-				|| submit_field.getAllText().toLowerCase().contains("sign-in") 
-				|| submit_field.getAllText().toLowerCase().contains("sign in"))) {
+		if(submitField != null && (submitField.getAllText().toLowerCase().contains("login") 
+				|| submitField.getAllText().toLowerCase().contains("sign-in") 
+				|| submitField.getAllText().toLowerCase().contains("sign in"))) {
 			return FormType.LOGIN;
 		}
-		else if(submit_field != null && (submit_field.getAllText().toLowerCase().contains("register") 
-				|| submit_field.getAllText().toLowerCase().contains("sign-up") 
-				|| submit_field.getAllText().toLowerCase().contains("sign up"))) {
+		else if(submitField != null && (submitField.getAllText().toLowerCase().contains("register") 
+				|| submitField.getAllText().toLowerCase().contains("sign-up") 
+				|| submitField.getAllText().toLowerCase().contains("sign up"))) {
 			return FormType.REGISTRATION;
 		}
 		
 		boolean contains_username = false;
 		boolean contains_password = false;
 		boolean contains_password_confirmation = false;
-		for(ElementState element : form_fields) {
+		for(ElementState element : formFields) {
 			Map<String, String> element_attributes = element.getAttributes();
 			for(String attr_val: element_attributes.values()){
 				if(attr_val.contains("username") || attr_val.contains("email")){
@@ -150,35 +151,35 @@ public class Form extends LookseeObject{
 	}
 
 	public List<ElementState> getFormFields() {
-		return form_fields;
+		return formFields;
 	}
 	
 	public boolean addFormField(ElementState form_field) {
-		return this.form_fields.add(form_field);
+		return this.formFields.add(form_field);
 	}
 	
 	public boolean addFormFields(List<ElementState> form_field) {
-		return this.form_fields.addAll(form_field);
+		return this.formFields.addAll(form_field);
 	}
 	
 	public void setFormFields(List<ElementState> form_fields) {
-		this.form_fields = form_fields;
+		this.formFields = form_fields;
 	}
 
 	public ElementState getSubmitField() {
-		return submit_field;
+		return submitField;
 	}
 
 	public void setSubmitField(ElementState submit_field) {
-		this.submit_field = submit_field;
+		this.submitField = submit_field;
 	}
 
 	public ElementState getFormTag() {
-		return form_tag;
+		return formTag;
 	}
 
 	public void setFormTag(ElementState form_tag) {
-		this.form_tag = form_tag;
+		this.formTag = form_tag;
 	}
 
 	public FormType getType() {
@@ -190,39 +191,39 @@ public class Form extends LookseeObject{
 	}
 
 	public Long getMemoryId() {
-		return memory_id;
+		return memoryId;
 	}
 
 	public void setMemoryId(Long memory_id) {
-		this.memory_id = memory_id;
+		this.memoryId = memory_id;
 	}
 	
 	@Override
 	public Form clone(){
-		return new Form(form_tag, form_fields, submit_field, name);
+		return new Form(formTag, formFields, submitField, name);
 	}
 
 	public List<BugMessage> getBugMessages() {
-		return bug_messages;
+		return bugMessages;
 	}
 
 	public void setBugMessages(List<BugMessage> bug_messages) {
-		if(this.bug_messages == null) {
-			this.bug_messages = new ArrayList<>();
+		if(this.bugMessages == null) {
+			this.bugMessages = new ArrayList<>();
 		}
-		this.bug_messages = bug_messages;
+		this.bugMessages = bug_messages;
 	}
 	
 	public void addBugMessage(BugMessage bug_message) {
-		if(this.bug_messages == null) {
-			this.bug_messages = new ArrayList<>();
+		if(this.bugMessages == null) {
+			this.bugMessages = new ArrayList<>();
 		}
-		log.warn("bug meesages  :: "+this.bug_messages);
-		this.bug_messages.add(bug_message);
+		log.warn("bug meesages  :: "+this.bugMessages);
+		this.bugMessages.add(bug_message);
 	}
 
 	public void removeBugMessage(BugMessage msg) {
-		int idx = bug_messages.indexOf(msg);
-		this.bug_messages.remove(idx);
+		int idx = bugMessages.indexOf(msg);
+		this.bugMessages.remove(idx);
 	}
 }

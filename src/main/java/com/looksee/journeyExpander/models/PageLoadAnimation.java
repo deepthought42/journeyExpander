@@ -8,9 +8,9 @@ import java.util.List;
  */
 public class PageLoadAnimation extends LookseeObject {
 	
-	private List<String> image_urls;
-	private List<String> image_checksums;
-	private String page_url;
+	private List<String> imageUrls;
+	private List<String> imageChecksums;
+	private String pageUrl;
 	
 	public PageLoadAnimation(){}
 
@@ -34,26 +34,26 @@ public class PageLoadAnimation extends LookseeObject {
 	}
 
 	public List<String> getImageChecksums() {
-		return image_checksums;
+		return imageChecksums;
 	}
 
 	public void setImageChecksums(List<String> image_checksums) {
-		this.image_checksums = image_checksums;
+		this.imageChecksums = image_checksums;
 	}
 
 	public List<String> getImageUrls() {
-		return image_urls;
+		return imageUrls;
 	}
 
 	public void setImageUrls(List<String> image_urls) {
-		this.image_urls = image_urls;
+		this.imageUrls = image_urls;
 	}
 
 	public String getPageUrl() {
-		return page_url;
+		return pageUrl;
 	}
 
 	public void setPageUrl(String page_url) {
-		this.page_url = page_url;
+		this.pageUrl = page_url;
 	}
 }

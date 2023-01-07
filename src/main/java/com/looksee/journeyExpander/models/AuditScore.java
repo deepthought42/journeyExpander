@@ -1,27 +1,27 @@
 package com.looksee.journeyExpander.models;
 
 public class AuditScore {
-	private double content_score;
+	private double contentScore;
 	private double readability;
-	private double spelling_grammar;
-	private double image_quality;
-	private double alt_text;
+	private double spellingGrammar;
+	private double imageQuality;
+	private double altText;
 
-	private double information_architecture_score;
+	private double informationArchitectureScore;
 	private double links;
 	private double metadata;
 	private double seo;
 	private double security;
 	
-	private double aesthetics_score;
-	private double color_contrast;
+	private double aestheticsScore;
+	private double colorContrast;
 	private double whitespace;
 	
-	private double interactivity_score;
-	private double accessibility_score;
+	private double interactivityScore;
+	private double accessibilityScore;
 	
-	private double text_contrast;
-	private double non_text_contrast;
+	private double textContrast;
+	private double nonTextContrast;
 	
 	public AuditScore(double content_score,
 					  double readability,
@@ -65,43 +65,43 @@ public class AuditScore {
 	
 	
 	public double getContentScore() {
-		return content_score;
+		return contentScore;
 	}
 	
 	public void setContentScore(double content_score) {
-		this.content_score = content_score;
+		this.contentScore = content_score;
 	}
 
 	public double getInformationArchitectureScore() {
-		return information_architecture_score;
+		return informationArchitectureScore;
 	}
 
 	public void setInformationArchitectureScore(double information_architecture_score) {
-		this.information_architecture_score = information_architecture_score;
+		this.informationArchitectureScore = information_architecture_score;
 	}
 
 	public double getAestheticsScore() {
-		return aesthetics_score;
+		return aestheticsScore;
 	}
 
 	public void setAestheticsScore(double aesthetics_score) {
-		this.aesthetics_score = aesthetics_score;
+		this.aestheticsScore = aesthetics_score;
 	}
 
 	public double getInteractivityScore() {
-		return interactivity_score;
+		return interactivityScore;
 	}
 
 	public void setInteractivityScore(double interactivity_score) {
-		this.interactivity_score = interactivity_score;
+		this.interactivityScore = interactivity_score;
 	}
 
 	public double getAccessibilityScore() {
-		return accessibility_score;
+		return accessibilityScore;
 	}
 
 	public void setAccessibilityScore(double accessibility_score) {
-		this.accessibility_score = accessibility_score;
+		this.accessibilityScore = accessibility_score;
 	}
 
 
@@ -116,31 +116,31 @@ public class AuditScore {
 
 
 	public double getSpellingGrammar() {
-		return spelling_grammar;
+		return spellingGrammar;
 	}
 
 
 	public void setSpellingGrammar(double spelling_grammar) {
-		this.spelling_grammar = spelling_grammar;
+		this.spellingGrammar = spelling_grammar;
 	}
 
 	public double getImageQuality() {
-		return image_quality;
+		return imageQuality;
 	}
 
 
 	public void setImageQuality(double image_quality) {
-		this.image_quality = image_quality;
+		this.imageQuality = image_quality;
 	}
 
 
 	public double getAltText() {
-		return alt_text;
+		return altText;
 	}
 
 
 	public void setAltText(double alt_text) {
-		this.alt_text = alt_text;
+		this.altText = alt_text;
 	}
 
 
@@ -185,12 +185,12 @@ public class AuditScore {
 
 
 	public double getColorContrast() {
-		return color_contrast;
+		return colorContrast;
 	}
 
 
 	public void setColorContrast(double color_contrast) {
-		this.color_contrast = color_contrast;
+		this.colorContrast = color_contrast;
 	}
 
 
@@ -205,21 +205,21 @@ public class AuditScore {
 
 
 	public double getTextContrastScore() {
-		return text_contrast;
+		return textContrast;
 	}
 
 
 	public void setTextContrastScore(double text_contrast) {
-		this.text_contrast = text_contrast;
+		this.textContrast = text_contrast;
 	}
 
 
 	public double getNonTextContrastScore() {
-		return non_text_contrast;
+		return nonTextContrast;
 	}
 
 
 	public void setNonTextContrastScore(double non_text_contrast) {
-		this.non_text_contrast = non_text_contrast;
+		this.nonTextContrast = non_text_contrast;
 	}
 }

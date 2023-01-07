@@ -32,7 +32,7 @@ public abstract class LookseeObject {
 	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
 	@Property
-	private LocalDateTime created_at;
+	private LocalDateTime createdAt;
 	
 	public LookseeObject() {
 		setCreatedAt(LocalDateTime.now());
@@ -65,11 +65,11 @@ public abstract class LookseeObject {
 	}
 
 	public LocalDateTime getCreatedAt() {
-		return created_at;
+		return createdAt;
 	}
 
 	public void setCreatedAt(LocalDateTime created_at) {
-		this.created_at = created_at;
+		this.createdAt = created_at;
 	}
 	
 	public Long getId() {

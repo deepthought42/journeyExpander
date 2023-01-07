@@ -82,10 +82,10 @@ public class Browser {
 	
 	private static Logger log = LoggerFactory.getLogger(Browser.class);
 	private WebDriver driver = null;
-	private String browser_name; 
-	private long y_scroll_offset;
-	private long x_scroll_offset;
-	private Dimension viewport_size;
+	private String browserName; 
+	private long yScrollOffset;
+	private long xScrollOffset;
+	private Dimension viewportSize;
 	private static final String JS_GET_VIEWPORT_WIDTH = "var width = undefined; if (window.innerWidth) {width = window.innerWidth;} else if (document.documentElement && document.documentElement.clientWidth) {width = document.documentElement.clientWidth;} else { var b = document.getElementsByTagName('body')[0]; if (b.clientWidth) {width = b.clientWidth;}};return width;";
 	private static final String JS_GET_VIEWPORT_HEIGHT = "var height = undefined;  if (window.innerHeight) {height = window.innerHeight;}  else if (document.documentElement && document.documentElement.clientHeight) {height = document.documentElement.clientHeight;}  else { var b = document.getElementsByTagName('body')[0]; if (b.clientHeight) {height = b.clientHeight;}};return height;";
 	
@@ -470,6 +470,11 @@ public class Browser {
 				}
 			}while(!doWindowsMatch && (original_screenshot_row >= (int)(original_image.getHeight() - current_screenshot.getHeight()) && current_screenshot_row >= 0));
 		}
+		
+		for(BufferedImage current_screenshot : screenshots) {
+			current_screenshot.flush();
+		}
+		screenshots.clear();
 		return original_image;
 	}
 
@@ -847,28 +852,28 @@ public class Browser {
 	}
 	
 	public String getBrowserName() {
-		return browser_name;
+		return browserName;
 	}
 
 	public void setBrowserName(String browser_name) {
-		this.browser_name = browser_name;
+		this.browserName = browser_name;
 	}
 	
 
 	public long getYScrollOffset() {
-		return y_scroll_offset;
+		return yScrollOffset;
 	}
 
 	public void setYScrollOffset(long y_scroll_offset) {
-		this.y_scroll_offset = y_scroll_offset;
+		this.yScrollOffset = y_scroll_offset;
 	}
 
 	public long getXScrollOffset() {
-		return x_scroll_offset;
+		return xScrollOffset;
 	}
 
 	public void setXScrollOffset(long x_scroll_offset) {
-		this.x_scroll_offset = x_scroll_offset;
+		this.xScrollOffset = x_scroll_offset;
 	}
 	
 	public void scrollToElement(String xpath, WebElement elem) 
@@ -1056,11 +1061,11 @@ public class Browser {
 	}
 
 	public Dimension getViewportSize() {
-		return viewport_size;
+		return viewportSize;
 	}
 
 	public void setViewportSize(Dimension viewport_size) {
-		this.viewport_size = viewport_size;
+		this.viewportSize = viewport_size;
 	}
 
 	public void moveMouseOutOfFrame() {

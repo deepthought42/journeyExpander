@@ -9,6 +9,8 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 
 
+
+
 /**
  * Encompasses a domain name as well as all {@link Test}s and {@link Group}s 
  * belong to this domain
@@ -16,8 +18,8 @@ import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 public class Domain extends LookseeObject{
 	
 	private String url;
-	private String logo_url;
-	private String entrypoint_url;
+	private String logoUrl;
+	private String entrypointUrl;
 	private List<String> sitemap;
 	
 	@Relationship(type = "HAS")
@@ -79,11 +81,11 @@ public class Domain extends LookseeObject{
 	}
 
 	public String getLogoUrl() {
-		return logo_url;
+		return logoUrl;
 	}
 
 	public void setLogoUrl(String logo_url) {
-		this.logo_url = logo_url;
+		this.logoUrl = logo_url;
 	}
 
 	/**
@@ -138,11 +140,11 @@ public class Domain extends LookseeObject{
 	}
 
 	public String getEntrypointUrl() {
-		return entrypoint_url;
+		return entrypointUrl;
 	}
 
 	public void setEntrypointUrl(String entrypoint_url) {
-		this.entrypoint_url = entrypoint_url;
+		this.entrypointUrl = entrypoint_url;
 	}
 
 	public DesignSystem getDesignSystem() {

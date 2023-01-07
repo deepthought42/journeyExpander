@@ -8,7 +8,7 @@ import org.springframework.data.neo4j.core.schema.Node;
 @Node
 public class Screenshot extends LookseeObject {
 	
-	private String browser_name;
+	private String browserName;
 	private String url;
 	private String checksum;
 	private int width;
@@ -34,11 +34,11 @@ public class Screenshot extends LookseeObject {
 	}
 
 	public String getBrowser() {
-		return browser_name;
+		return browserName;
 	}
 
 	public void setBrowser(String browser_name) {
-		this.browser_name = browser_name;
+		this.browserName = browser_name;
 	}
 	
 	public String generateKey() {

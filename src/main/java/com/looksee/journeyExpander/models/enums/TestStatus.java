@@ -22,7 +22,7 @@ public enum TestStatus {
             throw new IllegalArgumentException();
         }
         for(TestStatus v : values()) {
-            if(value.equals(v.getShortName())) {
+            if(value.equalsIgnoreCase(v.getShortName())) {
                 return v;
             }
         }

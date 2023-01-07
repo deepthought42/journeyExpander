@@ -15,7 +15,7 @@ import com.looksee.journeyExpander.models.enums.Priority;
 public class PageStateIssueMessage extends UXIssueMessage {
 
 	@Relationship(type = "FOR")
-	private PageState page_state;
+	private PageState pageState;
 	
 	public PageStateIssueMessage() {}
 	
@@ -47,11 +47,11 @@ public class PageStateIssueMessage extends UXIssueMessage {
 	}
 
 	public PageState getElements() {
-		return page_state;
+		return pageState;
 	}
 
 
 	public void setPage(PageState page_state) {
-		this.page_state = page_state;
+		this.pageState = page_state;
 	}
 }

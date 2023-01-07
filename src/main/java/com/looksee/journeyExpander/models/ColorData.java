@@ -13,7 +13,7 @@ public class ColorData extends LookseeObject{
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(ColorData.class);
 
-	private double usage_percent;
+	private double usagePercent;
 	private int red;
 	private int green;
 	private int blue;
@@ -285,11 +285,11 @@ public class ColorData extends LookseeObject{
 	}
 
 	public double getUsagePercent() {
-		return usage_percent;
+		return usagePercent;
 	}
 
 	public void setUsagePercent(double usage_percent) {
-		this.usage_percent = usage_percent;
+		this.usagePercent = usage_percent;
 	}
 
 	public void alphaBlend(ColorData background_color_data) {

@@ -15,12 +15,13 @@ import com.looksee.journeyExpander.models.enums.Priority;
  * A observation of potential error for a given color palette 
  */
 public class ColorContrastIssueMessage extends ElementStateIssueMessage{
+	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(ColorContrastIssueMessage.class);
 
 	private double contrast;
-	private String foreground_color;
-	private String background_color;
-	private String font_size;
+	private String foregroundColor;
+	private String backgroundColor;
+	private String fontSize;
 	
 	public ColorContrastIssueMessage() {}
 	
@@ -100,26 +101,26 @@ public class ColorContrastIssueMessage extends ElementStateIssueMessage{
 	}
 
 	public String getForegroundColor() {
-		return foreground_color;
+		return foregroundColor;
 	}
 
 	public void setForegroundColor(String foreground_color) {
-		this.foreground_color = foreground_color;
+		this.foregroundColor = foreground_color;
 	}
 
 	public String getBackgroundColor() {
-		return background_color;
+		return backgroundColor;
 	}
 
 	public void setBackgroundColor(String background_color) {
-		this.background_color = background_color;
+		this.backgroundColor = background_color;
 	}
 
 	public String getFontSize() {
-		return font_size;
+		return fontSize;
 	}
 
 	public void setFontSize(String font_size) {
-		this.font_size = font_size;
+		this.fontSize = font_size;
 	}
 }

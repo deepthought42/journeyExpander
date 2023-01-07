@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Redirect extends Step {
-	private String start_url;
+	private String startUrl;
 	private List<String> urls;
-	private List<String> image_checksums;
-	private List<String> image_urls;
+	private List<String> imageChecksums;
+	private List<String> imageUrls;
 	
 	public Redirect() throws MalformedURLException{
 		setUrls(new ArrayList<String>());
@@ -49,15 +49,15 @@ public class Redirect extends Step {
 
 
 	public List<String> getImageChecksums() {
-		return image_checksums;
+		return imageChecksums;
 	}
 
 	public void setImageChecksums(List<String> image_checksums) {
-		this.image_checksums = image_checksums;
+		this.imageChecksums = image_checksums;
 	}
 
 	public List<String> getImageUrls() {
-		return image_urls;
+		return imageUrls;
 	}
 
 	public void setImageUrls(List<String> image_urls) {
@@ -71,11 +71,11 @@ public class Redirect extends Step {
 			}
 		}
 		
-		this.image_urls = deduped_list;
+		this.imageUrls = deduped_list;
 	}
 
 	public String getStartUrl() {
-		return start_url;
+		return startUrl;
 	}
 
 	public void setStartUrl(String start_url) {
@@ -84,7 +84,7 @@ public class Redirect extends Step {
 		if(params_idx > -1){
 			new_url = start_url.substring(0, params_idx);
 		}
-		this.start_url = new_url;
+		this.startUrl = new_url;
 	}
 
 }

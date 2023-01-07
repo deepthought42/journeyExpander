@@ -26,7 +26,7 @@ public enum PathStatus {
             throw new IllegalArgumentException();
         }
         for(PathStatus v : values()) {
-            if(value.equals(v.getShortName())) {
+            if(value.equalsIgnoreCase(v.getShortName())) {
                 return v;
             }
         }

@@ -23,7 +23,7 @@ public enum FormType {
             throw new IllegalArgumentException();
         }
         for(FormType v : values()) {
-            if(value.equals(v.getShortName())) {
+            if(value.equalsIgnoreCase(v.getShortName())) {
                 return v;
             }
         }

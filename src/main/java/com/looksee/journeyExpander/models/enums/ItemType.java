@@ -25,7 +25,7 @@ public enum ItemType {
             throw new IllegalArgumentException();
         }
         for(ItemType v : values()) {
-            if(value.equals(v.getShortName())) {
+            if(value.equalsIgnoreCase(v.getShortName())) {
                 return v;
             }
         }
