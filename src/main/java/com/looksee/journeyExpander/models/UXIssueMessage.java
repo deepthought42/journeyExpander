@@ -16,15 +16,15 @@ public class UXIssueMessage extends LookseeObject {
 
 	private String title;
 	private String description;
-	private String why_it_matters;
+	private String whyItMatters;
 	private String recommendation;
 	private String priority;
 	private String type;
 	private String category;
-	private String wcag_compliance;
+	private String wcagCompliance;
 	private Set<String> labels;
 	private int points;
-	private int max_points;
+	private int maxPoints;
 	private int score;
 
 	public UXIssueMessage() {}
@@ -125,19 +125,19 @@ public class UXIssueMessage extends LookseeObject {
 	}
 
 	public String getWcagCompliance() {
-		return wcag_compliance;
+		return wcagCompliance;
 	}
 
 	public void setWcagCompliance(String wcag_compliance) {
-		this.wcag_compliance = wcag_compliance;
+		this.wcagCompliance = wcag_compliance;
 	}
 
 	public String getWhyItMatters() {
-		return why_it_matters;
+		return whyItMatters;
 	}
 
 	public void setWhyItMatters(String why_it_matters) {
-		this.why_it_matters = why_it_matters;
+		this.whyItMatters = why_it_matters;
 	}
 
 	public String getTitle() {
@@ -157,11 +157,11 @@ public class UXIssueMessage extends LookseeObject {
 	}
 
 	public int getMaxPoints() {
-		return max_points;
+		return maxPoints;
 	}
 
 	public void setMaxPoints(int max_points) {
-		this.max_points = max_points;
+		this.maxPoints = max_points;
 	}
 
 	public String getRecommendation() {

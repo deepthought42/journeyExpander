@@ -22,7 +22,7 @@ public enum DomainAction {
             throw new IllegalArgumentException();
         }
         for(DomainAction v : values()) {
-            if(value.equals(v.getShortName())) {
+            if(value.equalsIgnoreCase(v.getShortName())) {
                 return v;
             }
         }

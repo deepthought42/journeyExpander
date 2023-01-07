@@ -16,10 +16,10 @@ import com.looksee.journeyExpander.models.enums.Priority;
  */
 public class ColorPaletteIssueMessage extends UXIssueMessage{
 	
-	private List<String> palette_colors = new ArrayList<>();
+	private List<String> paletteColors = new ArrayList<>();
 	
 	private Set<String> colors = new HashSet<>();
-	private String color_scheme;
+	private String colorScheme;
 	
 	public ColorPaletteIssueMessage() {
 		setPaletteColors(new ArrayList<>());
@@ -89,18 +89,18 @@ public class ColorPaletteIssueMessage extends UXIssueMessage{
 	}
 
 	public ColorScheme getColorScheme() {
-		return ColorScheme.create(color_scheme);
+		return ColorScheme.create(colorScheme);
 	}
 
 	public void setColorScheme(ColorScheme color_scheme) {
-		this.color_scheme = color_scheme.getShortName();
+		this.colorScheme = color_scheme.getShortName();
 	}
 
 	public List<String> getPaletteColors() {
-		return palette_colors;
+		return paletteColors;
 	}
 
 	public void setPaletteColors(List<String> palette) {
-		this.palette_colors.addAll(palette);
+		this.paletteColors.addAll(palette);
 	}
 }

@@ -2,15 +2,15 @@ package com.looksee.journeyExpander.models;
 
 public class SimpleElement {
 	private String key;
-	private String screenshot_url;
-	private int x_location;
-	private int y_location;
+	private String screenshotUrl;
+	private int xLocation;
+	private int yLocation;
 	private int width;
 	private int height;
 	private String text;
-	private String css_selector;
-	private boolean image_flagged;
-	private boolean adult_content;
+	private String cssSelector;
+	private boolean imageFlagged;
+	private boolean adultContent;
 	
 	public SimpleElement(String key, 
 						 String screenshot_url, 
@@ -35,24 +35,24 @@ public class SimpleElement {
 	}
 	
 	public String getScreenshotUrl() {
-		return screenshot_url;
+		return screenshotUrl;
 	}
 	public void setScreenshotUrl(String screenshot_url) {
-		this.screenshot_url = screenshot_url;
+		this.screenshotUrl = screenshot_url;
 	}
 	
 	public int getXLocation() {
-		return x_location;
+		return xLocation;
 	}
 	public void setXLocation(int x_location) {
-		this.x_location = x_location;
+		this.xLocation = x_location;
 	}
 	
 	public int getYLocation() {
-		return y_location;
+		return yLocation;
 	}
 	public void setYLocation(int y_location) {
-		this.y_location = y_location;
+		this.yLocation = y_location;
 	}
 	
 	public int getWidth() {
@@ -78,11 +78,11 @@ public class SimpleElement {
 	}
 
 	public String getCssSelector() {
-		return css_selector;
+		return cssSelector;
 	}
 
 	public void setCssSelector(String css_selector) {
-		this.css_selector = css_selector;
+		this.cssSelector = css_selector;
 	}
 
 	public String getText() {
@@ -94,18 +94,18 @@ public class SimpleElement {
 	}
 
 	public boolean isImageFlagged() {
-		return image_flagged;
+		return imageFlagged;
 	}
 
 	public void setImageFlagged(boolean is_image_flagged) {
-		this.image_flagged = is_image_flagged;
+		this.imageFlagged = is_image_flagged;
 	}
 
 	public boolean isAdultContent() {
-		return adult_content;
+		return adultContent;
 	}
 
 	public void setAdultContent(boolean adult_content) {
-		this.adult_content = adult_content;
+		this.adultContent = adult_content;
 	}	
 }

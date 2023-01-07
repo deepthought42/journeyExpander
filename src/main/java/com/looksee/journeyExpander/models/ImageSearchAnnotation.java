@@ -6,9 +6,9 @@ import java.util.UUID;
 
 public class ImageSearchAnnotation extends LookseeObject{
 	private float score;
-	private Set<String> best_guess_label;
-	private Set<String> full_matching_images;
-	private Set<String> similar_images;
+	private Set<String> bestGuessLabel;
+	private Set<String> fullMatchingImages;
+	private Set<String> similarImages;
 	
 	public ImageSearchAnnotation() {
 		setScore(0.0F);
@@ -34,22 +34,22 @@ public class ImageSearchAnnotation extends LookseeObject{
 		this.score = score;
 	}
 	public Set<String> getBestGuessLabel() {
-		return best_guess_label;
+		return bestGuessLabel;
 	}
 	public void setBestGuessLabel(Set<String> best_guess_label) {
-		this.best_guess_label = best_guess_label;
+		this.bestGuessLabel = best_guess_label;
 	}
 	public Set<String> getFullMatchingImages() {
-		return full_matching_images;
+		return fullMatchingImages;
 	}
 	public void setFullMatchingImages(Set<String> full_matching_images) {
-		this.full_matching_images = full_matching_images;
+		this.fullMatchingImages = full_matching_images;
 	}
 	public Set<String> getSimilarImages() {
-		return similar_images;
+		return similarImages;
 	}
 	public void setSimilarImages(Set<String> similar_images) {
-		this.similar_images = similar_images;
+		this.similarImages = similar_images;
 	}
 
 	@Override

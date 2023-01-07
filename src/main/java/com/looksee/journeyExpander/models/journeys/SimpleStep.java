@@ -1,10 +1,12 @@
 package com.looksee.journeyExpander.models.journeys;
 
+
+import com.looksee.journeyExpander.models.enums.Action;
+
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 
-import com.looksee.journeyExpander.models.enums.Action;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageState;
 
@@ -19,7 +21,7 @@ public class SimpleStep extends Step {
 	private ElementState element;
 	
 	private String action;
-	private String action_input;
+	private String actionInput;
 	
 	public SimpleStep() {
 		super();
@@ -73,7 +75,7 @@ public class SimpleStep extends Step {
 		if(getEndPage() != null) {
 			key += getEndPage().getId();
 		}
-		return "simplestep"+key+action+action_input;
+		return "simplestep"+key+action+actionInput;
 	}
 
 	
@@ -83,10 +85,10 @@ public class SimpleStep extends Step {
 	}
 	
 	public String getActionInput() {
-		return action_input;
+		return actionInput;
 	}
 
 	public void setActionInput(String action_input) {
-		this.action_input = action_input;
+		this.actionInput = action_input;
 	}
 }

@@ -8,12 +8,12 @@ package com.looksee.journeyExpander.models;
 public class SimplePage {
 	private long id;
 	private String url;
-	private String screenshot_url;
-	private String full_page_screenshot_url_onload;
-	private String full_page_screenshot_url_composite;
+	private String screenshotUrl;
+	private String fullPageScreenshotUrlOnload;
+	private String fullPageScreenshotUrlComposite;
 	private long width;
 	private long height;
-	private String html_source;
+	private String htmlSource;
 	private String key;
 	
 	public SimplePage(
@@ -47,27 +47,27 @@ public class SimplePage {
 	}
 
 	public String getScreenshotUrl() {
-		return screenshot_url;
+		return screenshotUrl;
 	}
 
 	public void setScreenshotUrl(String screenshot_url) {
-		this.screenshot_url = screenshot_url;
+		this.screenshotUrl = screenshot_url;
 	}
 
 	public String getFullPageScreenshotUrlOnload() {
-		return full_page_screenshot_url_onload;
+		return fullPageScreenshotUrlOnload;
 	}
 
 	public void setFullPageScreenshotUrlOnload(String full_page_screenshot_url) {
-		this.full_page_screenshot_url_onload = full_page_screenshot_url;
+		this.fullPageScreenshotUrlOnload = full_page_screenshot_url;
 	}
 
 	public String getFullPageScreenshotUrlComposite() {
-		return full_page_screenshot_url_composite;
+		return fullPageScreenshotUrlComposite;
 	}
 
 	public void setFullPageScreenshotUrlComposite(String full_page_screenshot_url_composite) {
-		this.full_page_screenshot_url_composite = full_page_screenshot_url_composite;
+		this.fullPageScreenshotUrlComposite = full_page_screenshot_url_composite;
 	}
 
 	public long getWidth() {
@@ -87,11 +87,11 @@ public class SimplePage {
 	}
 
 	public String getHtmlSource() {
-		return html_source;
+		return htmlSource;
 	}
 
 	public void setHtmlSource(String html_source) {
-		this.html_source = html_source;
+		this.htmlSource = html_source;
 	}
 
 	public String getKey() {

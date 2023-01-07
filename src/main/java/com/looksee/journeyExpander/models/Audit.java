@@ -22,11 +22,11 @@ public class Audit extends LookseeObject {
 	private String name; // name of the audit
 	private String level;
 	private int points;      //scoring
-	private int total_possible_points;      //scoring
+	private int totalPossiblePoints;      //scoring
 	private String url;
-	private boolean is_accessibility;
+	private boolean accessibilityFlag;
 	private String description;
-	private String why_it_matters;
+	private String whyItMatters;
 	
 	@Relationship(type = "HAS")
 	private Set<UXIssueMessage> messages;
@@ -53,7 +53,7 @@ public class Audit extends LookseeObject {
 	 * @param url TODO
 	 * @param why_it_matters TODO
 	 * @param description TODO
-	 * @param isAccessibility TODO
+	 * @param accessibilityFlag TODO
 	 */
 	public Audit(
 			AuditCategory category, 
@@ -86,12 +86,12 @@ public class Audit extends LookseeObject {
 		setUrl(url);
 		setWhyItMatters(why_it_matters);
 		setDescription(description);
-		setAccessiblity(is_accessibility);
+		setAccessiblityFlag(is_accessibility);
 		setKey(generateKey());
 	}
 
 	public Audit clone() {
-		return new Audit(getCategory(), getSubcategory(), getName(), getPoints(), getMessages(), getLevel(), getTotalPossiblePoints(), getUrl(), getWhyItMatters(), getDescription(), isAccessiblity());
+		return new Audit(getCategory(), getSubcategory(), getName(), getPoints(), getMessages(), getLevel(), getTotalPossiblePoints(), getUrl(), getWhyItMatters(), getDescription(), getAccessiblityFlag());
 	}
 
 	/**
@@ -142,11 +142,11 @@ public class Audit extends LookseeObject {
 	}
 
 	public int getTotalPossiblePoints() {
-		return total_possible_points;
+		return totalPossiblePoints;
 	}
 
 	public void setTotalPossiblePoints(int total_possible_points) {
-		this.total_possible_points = total_possible_points;
+		this.totalPossiblePoints = total_possible_points;
 	}
 	
 
@@ -175,11 +175,11 @@ public class Audit extends LookseeObject {
 	}
 	
 	public String getWhyItMatters() {
-		return why_it_matters;
+		return whyItMatters;
 	}
 
 	public void setWhyItMatters(String why_it_matters) {
-		this.why_it_matters = why_it_matters;
+		this.whyItMatters = why_it_matters;
 	}
 
 	public Set<String> getLabels() {
@@ -199,11 +199,11 @@ public class Audit extends LookseeObject {
 		this.messages = messages;
 	}
 
-	public boolean isAccessiblity() {
-		return is_accessibility;
+	public boolean getAccessiblityFlag() {
+		return accessibilityFlag;
 	}
 
-	public void setAccessiblity(boolean is_accessibility) {
-		this.is_accessibility = is_accessibility;
+	public void setAccessiblityFlag(boolean is_accessibility) {
+		this.accessibilityFlag = is_accessibility;
 	}
 }

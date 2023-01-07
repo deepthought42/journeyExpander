@@ -15,10 +15,10 @@ import com.looksee.journeyExpander.models.enums.ExecutionStatus;
  * Record detailing an set of {@link Audit audits}.
  */
 public class DomainAuditRecord extends AuditRecord {
-	private int total_pages;
+	private int totalPages;
 	
 	@Relationship(type = "HAS")
-	private Set<PageAuditRecord> page_audit_records;
+	private Set<PageAuditRecord> pageAuditRecords;
 	
 	public DomainAuditRecord() {
 		super();
@@ -54,26 +54,26 @@ public class DomainAuditRecord extends AuditRecord {
 	}
 
 	public Set<PageAuditRecord> getAudits() {
-		return page_audit_records;
+		return pageAuditRecords;
 	}
 
 	public void setAudits(Set<PageAuditRecord> audits) {
-		this.page_audit_records = audits;
+		this.pageAuditRecords = audits;
 	}
 
 	public void addAudit(PageAuditRecord audit) {
-		this.page_audit_records.add( audit );
+		this.pageAuditRecords.add( audit );
 	}
 	
 	public void addAudits(Set<PageAuditRecord> audits) {
-		this.page_audit_records.addAll( audits );
+		this.pageAuditRecords.addAll( audits );
 	}
 
 	public int getTotalPages() {
-		return total_pages;
+		return totalPages;
 	}
 
 	public void setTotalPages(int total_pages) {
-		this.total_pages = total_pages;
+		this.totalPages = total_pages;
 	}
 }

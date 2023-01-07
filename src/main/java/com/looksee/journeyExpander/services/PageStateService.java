@@ -129,8 +129,8 @@ public class PageStateService {
 		return page_state_repo.findAuditBySubCategory(subcategory.getShortName(), page_state_key);
 	}
 
-	public List<ElementState> getVisibleLeafElements(String page_state_key) {
-		return page_state_repo.getVisibleLeafElements(page_state_key);
+	public List<ElementState> getVisibleLeafElements(long page_state_id) {
+		return page_state_repo.getVisibleLeafElements(page_state_id);
 	}
 
 	public PageState findByUrl(String url) {

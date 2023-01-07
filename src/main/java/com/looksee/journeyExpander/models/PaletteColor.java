@@ -10,10 +10,10 @@ import java.util.Map;
  */
 public class PaletteColor {
 
-	private String primary_color;
-	private double primary_color_percent;
+	private String primaryColor;
+	private double primaryColorPercent;
 	
-	private Map<String, String> tints_shades_tones = new HashMap<>();
+	private Map<String, String> tintsShadesTones = new HashMap<>();
 	
 	public PaletteColor() {}
 	
@@ -24,26 +24,26 @@ public class PaletteColor {
 	}
 
 	public String getPrimaryColor() {
-		return primary_color;
+		return primaryColor;
 	}
 
 	private void setPrimaryColor(String primary_color) {
-		this.primary_color = primary_color;
+		this.primaryColor = primary_color;
 	}
 
 	public double getPrimaryColorPercent() {
-		return primary_color_percent;
+		return primaryColorPercent;
 	}
 
 	private void setPrimaryColorPercent(double primary_color_percent) {
-		this.primary_color_percent = primary_color_percent;
+		this.primaryColorPercent = primary_color_percent;
 	}
 
 	public Map<String, String> getTintsShadesTones() {
-		return tints_shades_tones;
+		return tintsShadesTones;
 	}
 
 	public void addTintsShadesTones(Map<String, String> tints_shades_tones) {
-		this.tints_shades_tones.putAll(tints_shades_tones);
+		this.tintsShadesTones.putAll(tints_shades_tones);
 	}
 }

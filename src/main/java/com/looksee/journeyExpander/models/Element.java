@@ -11,12 +11,12 @@ import java.util.Set;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.data.neo4j.core.schema.CompositeProperty;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 
-import com.looksee.journeyExpander.models.enums.ElementClassification;
 import com.looksee.models.rules.Rule;
+import com.looksee.journeyExpander.models.enums.ElementClassification;
 
 
 
@@ -31,25 +31,25 @@ public class Element extends LookseeObject implements Comparable<Element> {
 
 	private String name;
 	private String xpath;
-	private String css_selector;
+	private String cssSelector;
 	private String classification;
 	private String template;
 	private String text;
 	
-	@Property
+	@CompositeProperty
 	private Map<String, String> attributes = new HashMap<>();
 	
-	@Property
-	private Map<String, String> pre_render_css_values = new HashMap<>();
+	@CompositeProperty
+	private Map<String, String> preRenderCssValues = new HashMap<>();
 	
 	@Relationship(type = "HAS", direction = Direction.OUTGOING)
 	private Set<Rule> rules = new HashSet<>();
 
 	@Relationship(type = "HAS_CHILD", direction = Direction.OUTGOING)
-	private List<Element> child_elements = new ArrayList<>();
+	private List<Element> childElements = new ArrayList<>();
 	
 	@Relationship()
-	private List<ElementState> element_states = new ArrayList<>();
+	private List<ElementState> elementEtates = new ArrayList<>();
 
 	public Element(){
 		super();
@@ -134,11 +134,11 @@ public class Element extends LookseeObject implements Comparable<Element> {
 	 * @return whether attributes match or not
 	 */
 	public boolean cssMatches(Element elem){
-		for(String propertyName : pre_render_css_values.keySet()){
+		for(String propertyName : preRenderCssValues.keySet()){
 			if(propertyName.contains("-moz-") || propertyName.contains("-webkit-") || propertyName.contains("-o-") || propertyName.contains("-ms-")){
 				continue;
 			}
-			if(!pre_render_css_values.get(propertyName).equals(elem.getPreRenderCssValues().get(propertyName))){
+			if(!preRenderCssValues.get(propertyName).equals(elem.getPreRenderCssValues().get(propertyName))){
 				return false;
 			}
 		}
@@ -167,11 +167,11 @@ public class Element extends LookseeObject implements Comparable<Element> {
 	}
 
 	public Map<String, String> getPreRenderCssValues() {
-		return pre_render_css_values;
+		return preRenderCssValues;
 	}
 
 	public void setPreRenderCssValues(Map<String, String> css_values) {
-		this.pre_render_css_values = css_values;
+		this.preRenderCssValues = css_values;
 	}
 	
 	public Set<Rule> getRules(){
@@ -251,11 +251,11 @@ public class Element extends LookseeObject implements Comparable<Element> {
 	}
 
 	public String getCssSelector() {
-		return css_selector;
+		return cssSelector;
 	}
 
 	public void setCssSelector(String css_selector) {
-		this.css_selector = css_selector;
+		this.cssSelector = css_selector;
 	}
 
 	public String getTemplate(){
@@ -279,15 +279,15 @@ public class Element extends LookseeObject implements Comparable<Element> {
 	}
 	
 	public List<Element> getChildElements() {
-		return child_elements;
+		return childElements;
 	}
 
 	public void setChildElements(List<Element> child_elements) {
-		this.child_elements = child_elements;
+		this.childElements = child_elements;
 	}
 	
 	public void addChildElement(Element child_element) {
-		this.child_elements.add(child_element);
+		this.childElements.add(child_element);
 	}
 
 	public Map<String, String> getAttributes() {

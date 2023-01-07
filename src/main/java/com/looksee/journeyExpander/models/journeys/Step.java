@@ -11,10 +11,10 @@ import com.looksee.journeyExpander.models.PageState;
 public class Step extends LookseeObject {
 	
 	@Relationship(type = "STARTS_WITH")
-	private PageState start_page;
+	private PageState startPage;
 	
 	@Relationship(type = "ENDS_WITH")
-	private PageState end_page;
+	private PageState endPage;
 
 	public Step() {}
 	
@@ -24,30 +24,30 @@ public class Step extends LookseeObject {
 	}
 	
 	public PageState getStartPage() {
-		return start_page;
+		return startPage;
 	}
 	
 	public void setStartPage(PageState page_state) {
-		this.start_page = page_state;
+		this.startPage = page_state;
 	}
 	
 	
 	public PageState getEndPage() {
-		return this.end_page;
+		return this.endPage;
 	}
 	
 	public void setEndPage(PageState page_state) {
-		this.end_page = page_state;
+		this.endPage = page_state;
 	}
 	
 	@Override
 	public String generateKey() {
 		String key = "";
-		if(start_page != null) {
-			key += start_page.getId();
+		if(startPage != null) {
+			key += startPage.getId();
 		}
-		if(end_page != null) {
-			key += end_page.getId();
+		if(endPage != null) {
+			key += endPage.getId();
 		}
 		return "step"+key;
 	}

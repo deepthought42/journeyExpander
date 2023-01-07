@@ -17,29 +17,29 @@ import com.looksee.journeyExpander.models.enums.WCAGComplianceLevel;
 @Node
 public class DesignSystem extends LookseeObject{
 
-	private String wcag_compliance_level;
-	private String audience_proficiency;
+	private String wcagComplianceLevel;
+	private String audienceProficiency;
 	
-	private List<String> allowed_image_characteristics;
-	private List<String> color_palette;
+	private List<String> allowedImageCharacteristics;
+	private List<String> colorPalette;
 
 	public DesignSystem() {
-		wcag_compliance_level = WCAGComplianceLevel.AAA.toString();
-		audience_proficiency = AudienceProficiency.GENERAL.toString();
-		allowed_image_characteristics = new ArrayList<String>();
-		color_palette = new ArrayList<>();
+		wcagComplianceLevel = WCAGComplianceLevel.AAA.toString();
+		audienceProficiency = AudienceProficiency.GENERAL.toString();
+		allowedImageCharacteristics = new ArrayList<String>();
+		colorPalette = new ArrayList<>();
 	}
 	
 	public WCAGComplianceLevel getWcagComplianceLevel() {
-		return WCAGComplianceLevel.create(wcag_compliance_level);
+		return WCAGComplianceLevel.create(wcagComplianceLevel);
 	}
 
 	public void setWcagComplianceLevel(WCAGComplianceLevel wcag_compliance_level) {
-		this.wcag_compliance_level = wcag_compliance_level.toString();
+		this.wcagComplianceLevel = wcag_compliance_level.toString();
 	}
 
 	public AudienceProficiency getAudienceProficiency() {
-		return AudienceProficiency.create(audience_proficiency);
+		return AudienceProficiency.create(audienceProficiency);
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class DesignSystem extends LookseeObject{
 	 * @param audience_proficiency {@link AudienceProficiency} string value
 	 */
 	public void setAudienceProficiency(AudienceProficiency audience_proficiency) {
-		this.audience_proficiency = audience_proficiency.toString();
+		this.audienceProficiency = audience_proficiency.toString();
 	}
 	
 	@Override
@@ -57,19 +57,19 @@ public class DesignSystem extends LookseeObject{
 	}
 
 	public List<String> getAllowedImageCharacteristics() {
-		return allowed_image_characteristics;
+		return allowedImageCharacteristics;
 	}
 
 	public void setAllowedImageCharacteristics(List<String> allowed_image_characteristics) {
-		this.allowed_image_characteristics = allowed_image_characteristics;
+		this.allowedImageCharacteristics = allowed_image_characteristics;
 	}
 
 	public List<String> getColorPalette() {
-		return color_palette;
+		return colorPalette;
 	}
 
 	public void setColorPalette(List<String> color_palette) {
-		this.color_palette = color_palette;
+		this.colorPalette = color_palette;
 	}
 	
 	public boolean addColor(String color){

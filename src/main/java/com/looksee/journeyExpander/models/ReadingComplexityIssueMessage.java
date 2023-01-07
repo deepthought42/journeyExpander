@@ -10,7 +10,7 @@ import com.looksee.journeyExpander.models.enums.Priority;
  * A observation of potential error for a given {@link Element element} 
  */
 public class ReadingComplexityIssueMessage extends ElementStateIssueMessage {	
-	private double ease_of_reading_score;
+	private double easeOfReadingScore;
 
 	public ReadingComplexityIssueMessage() {}
 	
@@ -42,11 +42,11 @@ public class ReadingComplexityIssueMessage extends ElementStateIssueMessage {
 	}
 
 	public double getEaseOfReadingScore() {
-		return ease_of_reading_score;
+		return easeOfReadingScore;
 	}
 
 	public void setEaseOfReadingScore(double ease_of_reading_score) {
-		this.ease_of_reading_score = ease_of_reading_score;
+		this.easeOfReadingScore = ease_of_reading_score;
 	}
 
 }

@@ -10,7 +10,7 @@ import com.looksee.journeyExpander.models.enums.Priority;
  * A observation of potential error for a given {@link Element element} 
  */
 public class StockImageIssueMessage extends ElementStateIssueMessage {	
-	private boolean stock_image;
+	private boolean stockImage;
 
 	public StockImageIssueMessage() {}
 	
@@ -42,10 +42,10 @@ public class StockImageIssueMessage extends ElementStateIssueMessage {
 	}
 
 	public boolean isStockImage() {
-		return stock_image;
+		return stockImage;
 	}
 
 	public void setStockImage(boolean stock_image) {
-		this.stock_image = stock_image;
+		this.stockImage = stock_image;
 	}
 }

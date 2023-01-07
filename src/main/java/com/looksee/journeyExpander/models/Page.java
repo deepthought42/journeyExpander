@@ -39,7 +39,7 @@ public class Page extends LookseeObject {
 	private List<Element> elements;
 	
 	@Relationship(type = "HAS")
-	private List<PageState> page_states;
+	private List<PageState> pageStates;
 
 
 	public Page() {
@@ -261,15 +261,15 @@ public class Page extends LookseeObject {
 	}
 
 	public void setPageStates(List<PageState> page_states) {
-		this.page_states = page_states;
+		this.pageStates = page_states;
 	}
 
 	public List<PageState> getPageStates(){
-		return this.page_states;
+		return this.pageStates;
 	}
 	
 	public boolean addPageState(PageState page_state_record) {
-		return this.page_states.add(page_state_record);
+		return this.pageStates.add(page_state_record);
 	}
 	
 	public void setTitle(String title) {
