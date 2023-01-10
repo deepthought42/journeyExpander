@@ -27,7 +27,6 @@ import io.github.resilience4j.retry.annotation.Retry;
  *
  */
 @Service
-@Retry(name = "neoforj")
 public class PageStateService {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(PageStateService.class.getName());
@@ -127,10 +126,6 @@ public class PageStateService {
 
 	public Audit findAuditBySubCategory(AuditName subcategory, String page_state_key) {
 		return page_state_repo.findAuditBySubCategory(subcategory.getShortName(), page_state_key);
-	}
-
-	public List<ElementState> getVisibleLeafElements(long page_state_id) {
-		return page_state_repo.getVisibleLeafElements(page_state_id);
 	}
 
 	public PageState findByUrl(String url) {

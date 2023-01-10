@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.looksee.journeyExpander.models.enums.BrowserType;
 import com.looksee.journeyExpander.services.BrowserService;
 
+
 /**
  * A reference to a web page
  *
