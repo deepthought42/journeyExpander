@@ -82,8 +82,11 @@ public class AuditController {
 	    log.warn("data value :: "+target);
 	    ObjectMapper input_mapper = new ObjectMapper();
 	    VerifiedJourneyMessage journey_msg = input_mapper.readValue(target, VerifiedJourneyMessage.class);
-
-	    log.warn("message " + journey_msg);
+	    
+	    log.warn("journey order ids" + journey_msg.getJourney().getOrderedIds());
+	    log.warn("journey status :: "+journey_msg.getStatus());
+	    log.warn("journey browser :: "+journey_msg.getBrowser());
+	    
 	    Journey journey = journey_msg.getJourney();
 	    
 	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey);
@@ -93,6 +96,7 @@ public class AuditController {
 		List<String> interactive_elements = new ArrayList<>();
 
 		List<Step> journey_steps = journey.getSteps();
+		log.warn("journey steps : "+journey_steps);
 		try {
 			boolean page_needs_extraction = false;
 			//start a new browser session
