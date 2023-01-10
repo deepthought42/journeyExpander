@@ -50,7 +50,7 @@ import com.looksee.journeyExpander.models.journeys.Journey;
 import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
 import com.looksee.journeyExpander.models.message.VerifiedJourneyMessage;
-import com.looksee.journeyExpander.services.PageStateService;
+import com.looksee.journeyExpander.services.ElementStateService;
 import com.looksee.journeyExpander.services.StepExecutor;
 
 
@@ -58,9 +58,9 @@ import com.looksee.journeyExpander.services.StepExecutor;
 @RestController
 public class AuditController {
 	private static Logger log = LoggerFactory.getLogger(AuditController.class);
-
+	
 	@Autowired
-	private PageStateService page_state_service;
+	private ElementStateService element_state_service;
 	
 	@Autowired
 	private PubSubErrorPublisherImpl pubSubErrorPublisherImpl;
@@ -85,43 +85,46 @@ public class AuditController {
 
 	    log.warn("message " + journey_msg);
 	    Journey journey = journey_msg.getJourney();
-
-	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping");
+	    
+	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey);
 
 		List<Journey> hover_interactions = new ArrayList<>();
 		List<Journey> click_interactions = new ArrayList<>();
 		List<String> interactive_elements = new ArrayList<>();
-		
-		boolean executed_successfully = false;
-		int cnt = 0;
-		Browser browser = null;
-		do {
-			try {
-				boolean page_needs_extraction = false;
-				//start a new browser session
-				PageState journey_result_page = journey.getSteps().get(journey.getSteps().size()-1).getEndPage();
-				log.warn("journey result page = "+journey_result_page);
-				if(journey_result_page == null) {
-					journey_result_page = journey.getSteps().get(journey.getSteps().size()-1).getStartPage();
-					log.warn("journey last step start page = "+journey_result_page);
-					page_needs_extraction = true;
-				}
-				//get all leaf elements 
-				log.warn("total elements = "+journey_result_page.getElements());
-				log.warn("total elements = "+journey_result_page.getElements().size());
-				List<ElementState> leaf_elements = page_state_service.getVisibleLeafElements(journey_result_page.getId());
-				log.warn(leaf_elements.size()+" leaf elements found");
-				for(ElementState leaf_element : leaf_elements) {
-					log.warn("journey result page key :: "+journey_result_page.getKey());
-					log.warn("journey result matches exploration result?   " + journey_result_page.equals(null));
-					//check if page state is same as original page state. If not then add new ElementInteractionStep 
-					
-					log.warn("creating new element interaction step .... "+leaf_element);
+
+		List<Step> journey_steps = journey.getSteps();
+		try {
+			boolean page_needs_extraction = false;
+			//start a new browser session
+			PageState journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
+			log.warn("journey result page = "+journey_result_page);
+			
+			if(journey_result_page == null) {
+				journey_result_page = journey_steps.get(journey_steps.size()-1).getStartPage();
+				log.warn("journey last step start page = "+journey_result_page);
+				page_needs_extraction = true;
+			}
+			
+			List<Action> actions = new ArrayList<>();
+			actions.add(Action.CLICK);
+			actions.add(Action.MOUSE_OVER);
+			
+			//get all leaf elements 
+			log.warn("getting visible leaf elements for page with id = "+journey_result_page.getId());
+			List<ElementState> leaf_elements = element_state_service.getVisibleLeafElements(journey_result_page.getId());
+			log.warn(leaf_elements.size()+" leaf elements found");
+			JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+
+			for(ElementState leaf_element : leaf_elements) {
+				log.warn("journey result page key :: "+journey_result_page.getKey());
+				//check if page state is same as original page state. If not then add new ElementInteractionStep 
+				
+				for(Action action: actions) {
 					Step step = new SimpleStep(journey_result_page, 
-											 leaf_element, 
-											 Action.MOUSE_OVER, 
-											 "", 
-											 null);
+											 	leaf_element, 
+											 	action, 
+											 	"", 
+											 	null);
 					
 					if(existsInJourney(journey, step)) {
 						continue;
@@ -145,37 +148,47 @@ public class AuditController {
 					Journey new_journey = new Journey(steps, ordered_ids);
 					
 					//add journey to list of elements to explore for click or typing interactions
-					JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 					String journey_json = mapper.writeValueAsString(new_journey);
 					log.warn("audit progress update = "+journey_json);
 				    journey_candidate_topic.publish(journey_json);
 				    interactive_elements.add(leaf_element.getKey());
 				}
+			}
 
-				log.warn("sending "+hover_interactions.size()+ " hover interactions to Journey Manager +++");
-				executed_successfully = true;
-				return new ResponseEntity<String>("Successfully generated journey expansions", HttpStatus.OK);
-			}
-			catch(Exception e) {
-				log.warn("Exception occurred while expanding journey ::   "+e.getMessage());
-				e.printStackTrace();
-				if(browser != null) {
-					browser.close();
-				}
-				
-				JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
-				String journey_json = mapper.writeValueAsString(journey);
-				log.warn("audit progress update = "+journey_json);
-			    pubSubErrorPublisherImpl.publish(journey_json);
-			}
-		}while(!executed_successfully && cnt < 50);
+			log.warn("sending "+hover_interactions.size()+ " hover interactions to Journey Manager +++");
+			return new ResponseEntity<String>("Successfully generated journey expansions", HttpStatus.OK);
+		}
+		catch(Exception e) {
+			log.warn("Exception occurred while expanding journey ::   "+e.getMessage());
+			e.printStackTrace();
+			
+			JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+			String journey_json = mapper.writeValueAsString(journey);
+			log.warn("audit progress update = "+journey_json);
+		    pubSubErrorPublisherImpl.publish(journey_json);
+		}
 		
 		return new ResponseEntity<String>("Error occurred while expanding journey", HttpStatus.INTERNAL_SERVER_ERROR);
 
 	}
 	
+	/**
+	 * Checks if {@link Step} exists within the given {@link Journey}
+	 * 
+	 * @param journey
+	 * @param step
+	 * 
+	 * @return true if step already exists, otherwise false
+	 */
 	private boolean existsInJourney(Journey journey, Step step) {
+		log.warn("step = "+step);
+		log.warn("journey steps = "+journey.getSteps());
 		for(Step journey_step : journey.getSteps()) {
+			log.warn("journey step = "+journey_step);
+			if(journey_step == null) {
+				continue;
+			}
+			
 			if(journey_step.getKey().contentEquals(step.getKey())) {
 				return true;
 			}

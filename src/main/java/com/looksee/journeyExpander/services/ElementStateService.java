@@ -1,7 +1,6 @@
 package com.looksee.journeyExpander.services;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,10 +17,7 @@ import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.repository.ElementStateRepository;
 import com.looksee.models.rules.Rule;
 
-import io.github.resilience4j.retry.annotation.Retry;
-
 @Service
-@Retry(name="neoforj")
 public class ElementStateService {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(ElementStateService.class);
@@ -33,26 +29,16 @@ public class ElementStateService {
 	private PageStateService page_state_service;
 	
 	/**
-	 * 
+	 * saves element state to database
 	 * @param element
-	 * @return
+	 * @return saved record of element state
 	 * 
 	 * @pre element != null
 	 */
 	public ElementState save(ElementState element) {
 		assert element != null;
-		//ElementState element_record = element_repo.findByKey(element.getKey());
-		//if(element_record == null){
-			//iterate over attributes
+
 		return element_repo.save(element);
-		/*}
-		else {
-			element_record.setBackgroundColor(element.getBackgroundColor());
-			element_record.setForegroundColor(element.getForegroundColor());
-			element_repo.save(element_record);
-		}
-		return element_record;
-		 */
 	}
 	
 	/**
@@ -194,11 +180,8 @@ public class ElementStateService {
 
 	public List<ElementState> saveAll(List<ElementState> element_states, long page_state_id) {
 		return element_states.parallelStream()
-									   //.filter(f -> !existing_keys.contains(f.getKey()))
 									   .map(element -> save(element))
 									   .collect(Collectors.toList());
-
-		//return element_repo.saveAll(element_states);
 	}
 
 	/**
@@ -213,5 +196,9 @@ public class ElementStateService {
 
 	public List<ElementState> getElements(Set<String> existing_keys) {
 		return element_repo.getElements(existing_keys);
+	}
+	
+	public List<ElementState> getVisibleLeafElements(long page_state_id) {
+		return element_repo.getVisibleLeafElements(page_state_id);
 	}
 }

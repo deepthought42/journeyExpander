@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.looksee.journeyExpander.models.LookseeObject;
@@ -13,6 +14,7 @@ import com.looksee.journeyExpander.models.LookseeObject;
 /**
  * Represents the series of steps taken for an end to end journey
  */
+@Node
 public class Journey extends LookseeObject {
 
 	@Relationship(type = "HAS")
