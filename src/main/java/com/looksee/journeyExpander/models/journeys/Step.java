@@ -16,9 +16,12 @@ public class Step extends LookseeObject {
 	@Relationship(type = "ENDS_WITH")
 	private PageState endPage;
 
-	public Step() {}
+	public Step() {
+		super();
+	}
 	
 	public Step(PageState start_page, PageState end_page) {
+		super();
 		setStartPage(start_page);
 		setEndPage(end_page);
 	}

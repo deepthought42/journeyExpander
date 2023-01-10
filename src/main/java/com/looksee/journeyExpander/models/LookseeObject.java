@@ -36,6 +36,7 @@ public abstract class LookseeObject {
 	
 	public LookseeObject() {
 		setCreatedAt(LocalDateTime.now());
+		setKey(generateKey());
 	}
 	
 	public LookseeObject(String key) {
