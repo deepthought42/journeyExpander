@@ -39,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.looksee.journeyExpander.models.enums.Action;
-
+import com.looksee.journeyExpander.models.enums.BrowserType;
 import com.looksee.journeyExpander.gcp.PubSubErrorPublisherImpl;
 import com.looksee.journeyExpander.gcp.PubSubJourneyCandidatePublisherImpl;
 import com.looksee.journeyExpander.mapper.Body;
@@ -49,6 +49,7 @@ import com.looksee.journeyExpander.models.PageState;
 import com.looksee.journeyExpander.models.journeys.Journey;
 import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
+import com.looksee.journeyExpander.models.message.JourneyCandidateMessage;
 import com.looksee.journeyExpander.models.message.PageBuiltMessage;
 import com.looksee.journeyExpander.models.message.VerifiedJourneyMessage;
 import com.looksee.journeyExpander.services.ElementStateService;
@@ -117,7 +118,7 @@ public class AuditController {
 		List<Step> journey_steps = journey.getSteps();
 		log.warn("journey steps : "+journey_steps);
 		try {
-			boolean page_needs_extraction = false;
+			//boolean page_needs_extraction = false;
 			//start a new browser session
 			PageState journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
 			log.warn("journey result page = "+journey_result_page);
@@ -125,8 +126,17 @@ public class AuditController {
 			if(journey_result_page == null) {
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getStartPage();
 				log.warn("journey last step start page = "+journey_result_page);
-				page_needs_extraction = true;
+				//page_needs_extraction = true;
 			}
+			
+			//if start and end page match then it is a page load step and can be discarded in favor of a new expanded step
+			boolean page_load_step = false;
+			if(journey_steps.get(journey_steps.size()-1).getEndPage().equals(journey_steps.get(journey_steps.size()-1).getStartPage())){
+				page_load_step = true;
+			}
+			
+			//if the page has already been expanded then don't expand the journey for this page
+			
 			
 		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
@@ -194,28 +204,43 @@ public class AuditController {
 					if(existsInJourney(journey, step)) {
 						continue;
 					}
-					//step = step_service.save(step);
+
 					//add element back to service step
 					//clone journey and add this step at the end
 					List<Step> steps = new ArrayList<>(journey.getSteps());
-					List<Long> ordered_ids = new ArrayList<>(journey.getOrderedIds());
-					
-					if(page_needs_extraction) {
+					if(page_load_step) {
 						steps.set(steps.size()-1, step);
-						ordered_ids.set(ordered_ids.size()-1, step.getId());
 					}
 					else {
 						steps.add(step);
-						ordered_ids.add(step.getId());
 					}
+					
+					//log.warn("journey ordered ids = "+journey.getOrderedIds());
+					//List<Long> ordered_ids = new ArrayList<>(journey.getOrderedIds());
+					/*
+					if(page_needs_extraction) {
+						steps.set(steps.size()-1, step);
+						//ordered_ids.set(ordered_ids.size()-1, step.getId());
+					}
+					else {
+						steps.add(step);
+						//ordered_ids.add(step.getId());
+					}
+					*/
+					//Journey new_journey = new Journey(steps);
 					
 					Journey new_journey = new Journey(steps, ordered_ids);
 					new_journey = journey_service.save(new_journey);
 					
 					//add journey to list of elements to explore for click or typing interactions
-					String journey_json = mapper.writeValueAsString(new_journey);
-					log.warn("audit progress update = "+journey_json);
-				    journey_candidate_topic.publish(journey_json);
+					JourneyCandidateMessage candidate = new JourneyCandidateMessage(steps, 
+																					BrowserType.CHROME,
+																					journey_msg.getDomainId(),
+																					journey_msg.getAccountId(),
+																					journey_msg.getDomainAuditRecordId());
+					String candidate_json = mapper.writeValueAsString(candidate);
+					log.warn("journey candidate message = "+candidate_json);
+				    journey_candidate_topic.publish(candidate_json);
 				    interactive_elements.add(leaf_element.getKey());
 				}
 			}
