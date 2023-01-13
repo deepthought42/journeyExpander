@@ -25,6 +25,7 @@ public class Step extends LookseeObject {
 		super();
 		setStartPage(start_page);
 		setEndPage(end_page);
+		setKey(generateKey());
 	}
 	
 	public PageState getStartPage() {

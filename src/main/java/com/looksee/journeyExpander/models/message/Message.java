@@ -10,9 +10,9 @@ import org.threeten.bp.LocalDateTime;
 public abstract class Message {
 	private String messageId;
     private String publishTime;
-	private long account_id;
-	private long domain_id;
-	private long domain_audit_record_id;
+	private long accountId;
+	private long domainId;
+	private long domainAuditRecordId;
 	
 	public Message(){
 		setAccountId(-1);
@@ -36,27 +36,27 @@ public abstract class Message {
 	}
 	
 	public long getAccountId() {
-		return account_id;
+		return accountId;
 	}
 
 	protected void setAccountId(long account_id) {
-		this.account_id = account_id;
+		this.accountId = account_id;
 	}
 
 	public long getDomainAuditRecordId() {
-		return domain_audit_record_id;
+		return domainAuditRecordId;
 	}
 
 	public void setDomainAuditRecordId(long audit_record_id) {
-		this.domain_audit_record_id = audit_record_id;
+		this.domainAuditRecordId = audit_record_id;
 	}
 
 	public long getDomainId() {
-		return domain_id;
+		return domainId;
 	}
 
 	public void setDomainId(long domain_id) {
-		this.domain_id = domain_id;
+		this.domainId = domain_id;
 	}
 	
 	public String getMessageId() {
