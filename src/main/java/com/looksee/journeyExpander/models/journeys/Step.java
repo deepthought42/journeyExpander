@@ -3,10 +3,11 @@ package com.looksee.journeyExpander.models.journeys;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.looksee.journeyExpander.models.LookseeObject;
 import com.looksee.journeyExpander.models.PageState;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Node
 public class Step extends LookseeObject {
 	

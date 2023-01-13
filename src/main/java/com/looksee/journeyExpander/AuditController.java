@@ -63,6 +63,9 @@ public class AuditController {
 	private ElementStateService element_state_service;
 	
 	@Autowired
+	private JourneyService journey_service;
+	
+	@Autowired
 	private PubSubErrorPublisherImpl pubSubErrorPublisherImpl;
 	
 	@Autowired
@@ -176,6 +179,13 @@ public class AuditController {
 
 	}
 	
+    private boolean wasAlreadyExpanded(PageState journey_result_page) {
+		journey_service.
+		
+		
+		return false;
+	}
+
 	/**
 	 * Checks if {@link Step} exists within the given {@link Journey}
 	 * 
