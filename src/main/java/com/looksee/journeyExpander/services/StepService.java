@@ -1,11 +1,14 @@
 package com.looksee.journeyExpander.services;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.looksee.journeyExpander.models.ElementState;
+import com.looksee.journeyExpander.models.PageState;
 import com.looksee.journeyExpander.models.journeys.LoginStep;
 import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
@@ -114,5 +117,16 @@ public class StepService {
 
 	public ElementState getElementState(String step_key) {
 		return step_repo.getElementState(step_key);
+	}
+	
+
+	/**
+	 * Checks if page state is listed as a the start page for a journey step
+	 * 
+	 * @param page_state
+	 * @return
+	 */
+	public List<Step> wasPageExpanded(PageState page_state) {
+		return step_repo.getStepsWithStartPage(page_state.getId());
 	}
 }

@@ -49,9 +49,16 @@ import com.looksee.journeyExpander.models.PageState;
 import com.looksee.journeyExpander.models.journeys.Journey;
 import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
+import com.looksee.journeyExpander.models.message.PageBuiltMessage;
 import com.looksee.journeyExpander.models.message.VerifiedJourneyMessage;
 import com.looksee.journeyExpander.services.ElementStateService;
+import com.looksee.journeyExpander.services.JourneyService;
 import com.looksee.journeyExpander.services.StepExecutor;
+import com.looksee.journeyExpander.services.StepService;
+import com.looksee.journeyExpander.gcp.PubSubJourneyVerifiedPublisherImpl;
+import com.looksee.journeyExpander.gcp.PubSubPageCreatedPublisherImpl;
+import com.looksee.journeyExpander.models.enums.BrowserType;
+import com.looksee.journeyExpander.models.enums.PathStatus;
 
 
 // PubsubController consumes a Pub/Sub message.
@@ -63,6 +70,9 @@ public class AuditController {
 	private ElementStateService element_state_service;
 	
 	@Autowired
+	private StepService step_service;
+	
+	@Autowired
 	private JourneyService journey_service;
 	
 	@Autowired
@@ -70,6 +80,12 @@ public class AuditController {
 	
 	@Autowired
 	private PubSubJourneyCandidatePublisherImpl journey_candidate_topic;
+	
+	@Autowired
+	private PubSubJourneyVerifiedPublisherImpl pubSubJourneyVerifiedPublisherImpl;
+	
+	@Autowired
+	private PubSubPageCreatedPublisherImpl pubSubPageCreatedPublisherImpl;
 	
 	@Autowired
 	private StepExecutor step_executor;
@@ -95,7 +111,7 @@ public class AuditController {
 	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey);
 
 		List<Journey> hover_interactions = new ArrayList<>();
-		List<Journey> click_interactions = new ArrayList<>();
+		//List<Journey> click_interactions = new ArrayList<>();
 		List<String> interactive_elements = new ArrayList<>();
 
 		List<Step> journey_steps = journey.getSteps();
@@ -112,6 +128,49 @@ public class AuditController {
 				page_needs_extraction = true;
 			}
 			
+		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+
+			List<Step> stepsWithPage = step_service.wasPageExpanded(journey_result_page);
+			if( !stepsWithPage.isEmpty() ) {
+				
+				for(Step step : stepsWithPage) {
+					//send pageBuiltMessage with pageState and journey verified message
+					PageState page_state = step.getEndPage();
+					
+					log.warn("page state id :: " + page_state.getId());
+					
+			   		PageBuiltMessage page_built_msg = new PageBuiltMessage(journey_msg.getAccountId(),
+			   																journey_msg.getDomainAuditRecordId(),
+			   																journey_msg.getDomainId(), 
+			   																page_state.getId(),
+			   																journey_msg.getDomainAuditRecordId());
+					
+					String page_built_str = mapper.writeValueAsString(page_built_msg);
+				    pubSubPageCreatedPublisherImpl.publish(page_built_str);
+
+					if(journey_msg.getDomainAuditRecordId() >= 0) {
+						List<Step> steps = new ArrayList<>();
+						steps.add(new Step(page_state, null));
+						log.warn("adding steps to journey");
+						Journey new_journey = new Journey(steps);
+						log.warn("building journey Candidate message");
+						new_journey = journey_service.save(new_journey);
+						
+						VerifiedJourneyMessage verified_journey_msg = new VerifiedJourneyMessage(new_journey, 
+																						PathStatus.READY, 
+																						BrowserType.CHROME, 
+																						journey_msg.getDomainId(), 
+																						journey_msg.getAccountId(), 
+																						journey_msg.getDomainAuditRecordId());
+						log.warn("sending verified journey");
+						String journey_msg_str = mapper.writeValueAsString(verified_journey_msg);
+
+						pubSubJourneyVerifiedPublisherImpl.publish(journey_msg_str);
+					}
+				}
+				return new ResponseEntity<String>("Successfully generated journey expansions", HttpStatus.OK); 
+			}
+			
 			List<Action> actions = new ArrayList<>();
 			actions.add(Action.CLICK);
 			actions.add(Action.MOUSE_OVER);
@@ -120,7 +179,6 @@ public class AuditController {
 			log.warn("getting visible leaf elements for page with id = "+journey_result_page.getId());
 			List<ElementState> leaf_elements = element_state_service.getVisibleLeafElements(journey_result_page.getId());
 			log.warn(leaf_elements.size()+" leaf elements found");
-			JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
 			for(ElementState leaf_element : leaf_elements) {
 				log.warn("journey result page key :: "+journey_result_page.getKey());
@@ -151,8 +209,8 @@ public class AuditController {
 						ordered_ids.add(step.getId());
 					}
 					
-					
 					Journey new_journey = new Journey(steps, ordered_ids);
+					new_journey = journey_service.save(new_journey);
 					
 					//add journey to list of elements to explore for click or typing interactions
 					String journey_json = mapper.writeValueAsString(new_journey);
@@ -176,14 +234,6 @@ public class AuditController {
 		}
 		
 		return new ResponseEntity<String>("Error occurred while expanding journey", HttpStatus.INTERNAL_SERVER_ERROR);
-
-	}
-	
-    private boolean wasAlreadyExpanded(PageState journey_result_page) {
-		journey_service.
-		
-		
-		return false;
 	}
 
 	/**
