@@ -126,7 +126,7 @@ public class StepService {
 	 * @param page_state
 	 * @return
 	 */
-	public List<Step> wasPageExpanded(PageState page_state) {
+	public List<Step> getStepsWithStartPage(PageState page_state) {
 		return step_repo.getStepsWithStartPage(page_state.getId());
 	}
 }
