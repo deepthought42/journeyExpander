@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.looksee.journeyExpander.models.enums.Action;
 import com.looksee.journeyExpander.models.enums.BrowserType;
+import com.looksee.journeyExpander.models.Domain;
 import com.looksee.journeyExpander.gcp.PubSubErrorPublisherImpl;
 import com.looksee.journeyExpander.gcp.PubSubJourneyCandidatePublisherImpl;
 import com.looksee.journeyExpander.mapper.Body;
@@ -52,13 +53,14 @@ import com.looksee.journeyExpander.models.journeys.Step;
 import com.looksee.journeyExpander.models.message.JourneyCandidateMessage;
 import com.looksee.journeyExpander.models.message.PageBuiltMessage;
 import com.looksee.journeyExpander.models.message.VerifiedJourneyMessage;
+import com.looksee.journeyExpander.services.DomainService;
 import com.looksee.journeyExpander.services.ElementStateService;
 import com.looksee.journeyExpander.services.JourneyService;
 import com.looksee.journeyExpander.services.StepExecutor;
 import com.looksee.journeyExpander.services.StepService;
+import com.looksee.utils.BrowserUtils;
 import com.looksee.journeyExpander.gcp.PubSubJourneyVerifiedPublisherImpl;
 import com.looksee.journeyExpander.gcp.PubSubPageCreatedPublisherImpl;
-import com.looksee.journeyExpander.models.enums.BrowserType;
 import com.looksee.journeyExpander.models.enums.PathStatus;
 
 
@@ -66,6 +68,9 @@ import com.looksee.journeyExpander.models.enums.PathStatus;
 @RestController
 public class AuditController {
 	private static Logger log = LoggerFactory.getLogger(AuditController.class);
+	
+	@Autowired
+	private DomainService domain_service;
 	
 	@Autowired
 	private ElementStateService element_state_service;
@@ -123,24 +128,39 @@ public class AuditController {
 			PageState journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
 			log.warn("journey result page = "+journey_result_page);
 			
+			PageState start_page = journey_steps.get(journey_steps.size()-1).getStartPage();
 			if(journey_result_page == null) {
-				journey_result_page = journey_steps.get(journey_steps.size()-1).getStartPage();
-				log.warn("journey last step start page = "+journey_result_page);
-				//page_needs_extraction = true;
+				journey_result_page = start_page;
 			}
 			
-			//if start and end page match then it is a page load step and can be discarded in favor of a new expanded step
-			boolean page_load_step = false;
-			if(journey_steps.get(journey_steps.size()-1).getEndPage().equals(journey_steps.get(journey_steps.size()-1).getStartPage())){
-				page_load_step = true;
+			//if start page is external then don't expand
+			log.warn("domain id = "+journey_msg.getDomainId());
+			Domain domain = domain_service.findById(journey_msg.getDomainId()).get();
+			
+			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl()) || BrowserUtils.isExternalLink(domain.getUrl(), start_page.getUrl())) {
+				log.warn("current url is external : "+start_page.getUrl());
+				
+				//create and save journey
+				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK); 
 			}
+			
+			log.warn("journey last step start page = "+journey_result_page);
+			
+			//if start and end page match then it is a page load step and can be discarded in favor of a new expanded step
+			boolean page_load_step = journey_steps.get(journey_steps.size()-1).getEndPage().equals(journey_steps.get(journey_steps.size()-1).getStartPage());
 			
 			//if the page has already been expanded then don't expand the journey for this page
 			
 			
 		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
-			List<Step> stepsWithPage = step_service.wasPageExpanded(journey_result_page);
+		    //was page already expanded? If so then send page created message and verified journey with using 
+		    //the associated final page state
+		    if(wasPagePreviouslyExpanded(journey_result_page, journey_msg)) {
+				return new ResponseEntity<String>("Last page was already expanded. Discarding duplicate", HttpStatus.OK); 
+		    }
+			List<Step> stepsWithPage = step_service.getStepsWithStartPage(journey_result_page);
+			log.warn("steps with Page");
 			if( !stepsWithPage.isEmpty() ) {
 				
 				for(Step step : stepsWithPage) {
@@ -178,7 +198,6 @@ public class AuditController {
 						pubSubJourneyVerifiedPublisherImpl.publish(journey_msg_str);
 					}
 				}
-				return new ResponseEntity<String>("Successfully generated journey expansions", HttpStatus.OK); 
 			}
 			
 			List<Action> actions = new ArrayList<>();
@@ -216,7 +235,6 @@ public class AuditController {
 					}
 					
 					//log.warn("journey ordered ids = "+journey.getOrderedIds());
-					//List<Long> ordered_ids = new ArrayList<>(journey.getOrderedIds());
 					/*
 					if(page_needs_extraction) {
 						steps.set(steps.size()-1, step);
@@ -229,6 +247,7 @@ public class AuditController {
 					*/
 					//Journey new_journey = new Journey(steps);
 					
+					List<Long> ordered_ids = new ArrayList<>(journey.getOrderedIds());
 					Journey new_journey = new Journey(steps, ordered_ids);
 					new_journey = journey_service.save(new_journey);
 					
@@ -259,6 +278,55 @@ public class AuditController {
 		}
 		
 		return new ResponseEntity<String>("Error occurred while expanding journey", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	private boolean wasPagePreviouslyExpanded(PageState journey_result_page, VerifiedJourneyMessage msg) 
+			throws JsonProcessingException, ExecutionException, InterruptedException 
+	{
+		List<Step> stepsWithPage = step_service.getStepsWithStartPage(journey_result_page);
+		log.warn("steps with Page = "+stepsWithPage.size()+" ...for page with id ="+journey_result_page.getId());
+		if( !stepsWithPage.isEmpty() ) {
+		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+
+			for(Step step : stepsWithPage) {
+				//send pageBuiltMessage with pageState and journey verified message
+				PageState page_state = step.getEndPage();
+				
+				log.warn("page state id :: " + page_state.getId());
+				
+		   		PageBuiltMessage page_built_msg = new PageBuiltMessage(msg.getAccountId(),
+														   				msg.getDomainAuditRecordId(),
+														   				msg.getDomainId(), 
+		   																page_state.getId(),
+		   																msg.getDomainAuditRecordId());
+				
+				String page_built_str = mapper.writeValueAsString(page_built_msg);
+			    pubSubPageCreatedPublisherImpl.publish(page_built_str);
+
+				if(msg.getDomainAuditRecordId() >= 0) {
+					List<Step> steps = new ArrayList<>();
+					steps.add(new Step(page_state, null));
+					log.warn("adding steps to journey");
+					Journey new_journey = new Journey(steps);
+					log.warn("building journey Candidate message");
+					new_journey = journey_service.save(new_journey);
+					
+					VerifiedJourneyMessage verified_journey_msg = new VerifiedJourneyMessage(new_journey, 
+																					PathStatus.READY, 
+																					BrowserType.CHROME, 
+																					msg.getDomainId(), 
+																					msg.getAccountId(), 
+																					msg.getDomainAuditRecordId());
+					log.warn("sending verified journey");
+					String journey_msg_str = mapper.writeValueAsString(verified_journey_msg);
+
+					pubSubJourneyVerifiedPublisherImpl.publish(journey_msg_str);
+				}
+			}
+			return true; 
+		}
+		
+		return false;
 	}
 
 	/**
