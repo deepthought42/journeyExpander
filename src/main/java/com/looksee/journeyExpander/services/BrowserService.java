@@ -352,7 +352,7 @@ public class BrowserService {
 				}
 			}
 			cnt++;
-		}while(!complete && cnt < 10000);
+		}while(!complete && cnt < 10);
 		
 		return page_state;
 	}
@@ -541,7 +541,7 @@ public class BrowserService {
 				}
 			}
 			cnt++;
-		}while(rendering_incomplete && cnt < 10000);
+		}while(rendering_incomplete && cnt < 10);
 
 		return elements;
 	}
@@ -1091,7 +1091,7 @@ public class BrowserService {
 	public static List<ElementState> filterNoWidthOrHeight(List<ElementState> web_elements, boolean is_element_state) {
 		List<ElementState> elements = new ArrayList<>(web_elements.size());
 		for(ElementState element : web_elements){
-			if(element.getHeight() > 1 && element.getWidth() > 1){
+			if(hasWidthAndHeight(new Dimension(element.getWidth(), element.getHeight()))) {
 				elements.add(element);
 			}
 		}

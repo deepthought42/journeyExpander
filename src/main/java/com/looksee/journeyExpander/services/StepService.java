@@ -13,6 +13,7 @@ import com.looksee.journeyExpander.models.journeys.LoginStep;
 import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
 import com.looksee.journeyExpander.models.repository.LoginStepRepository;
+import com.looksee.journeyExpander.models.repository.PageStateRepository;
 import com.looksee.journeyExpander.models.repository.SimpleStepRepository;
 import com.looksee.journeyExpander.models.repository.StepRepository;
 
@@ -29,6 +30,9 @@ public class StepService {
 
 	@Autowired
 	private StepRepository step_repo;
+	
+	@Autowired
+	private PageStateRepository page_state_repo;
 	
 	@Autowired
 	private SimpleStepRepository simple_step_repo;
@@ -111,8 +115,25 @@ public class StepService {
 			
 			return new_login_step;
 		}
-		
-		return null;
+		else {
+			Step step_record = step_repo.findByKey(step.getKey());
+			
+			if(step_record != null) {
+				step_record.setStartPage(step.getStartPage());
+				step_record.setEndPage(step.getEndPage());
+				
+				return step_record;
+			}
+			else {
+				Step saved_step = step_repo.save(step);
+				step_repo.addStartPage(saved_step.getId(), saved_step.getStartPage().getId());
+				step_repo.addEndPage(saved_step.getId(), saved_step.getEndPage().getId());
+				saved_step.setStartPage(saved_step.getStartPage());
+				saved_step.setEndPage(saved_step.getEndPage());
+				
+				return saved_step;
+			}
+		}
 	}
 
 	public ElementState getElementState(String step_key) {
@@ -128,5 +149,9 @@ public class StepService {
 	 */
 	public List<Step> getStepsWithStartPage(PageState page_state) {
 		return step_repo.getStepsWithStartPage(page_state.getId());
+	}
+
+	public PageState getEndPage(long id) {
+		return page_state_repo.getEndPageForStep(id);
 	}
 }

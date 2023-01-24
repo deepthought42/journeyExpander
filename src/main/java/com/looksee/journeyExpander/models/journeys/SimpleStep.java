@@ -3,6 +3,8 @@ package com.looksee.journeyExpander.models.journeys;
 
 import com.looksee.journeyExpander.models.enums.Action;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.schema.Relationship.Direction;
@@ -16,6 +18,7 @@ import com.looksee.journeyExpander.models.PageState;
  */
 @Node
 public class SimpleStep extends Step {
+	private static Logger log = LoggerFactory.getLogger(SimpleStep.class);
 	
 	@Relationship(type = "HAS", direction = Direction.OUTGOING)
 	private ElementState element;
@@ -33,7 +36,8 @@ public class SimpleStep extends Step {
 				ElementState element,
 				Action action,
 				String action_input, 
-				PageState end_page) {
+				PageState end_page) 
+	{
 		setStartPage(start_page);
 		setElementState(element);
 		setAction(action);
@@ -44,7 +48,11 @@ public class SimpleStep extends Step {
 	
 	@Override
 	public SimpleStep clone() {
-		return new SimpleStep(getStartPage(), getElementState(), getAction(), getActionInput(), getEndPage());
+		return new SimpleStep(getStartPage(), 
+							  getElementState(), 
+							  getAction(), 
+							  getActionInput(), 
+							  getEndPage());
 	}
 	
 	public ElementState getElementState() {
@@ -75,6 +83,7 @@ public class SimpleStep extends Step {
 		if(getEndPage() != null) {
 			key += getEndPage().getId();
 		}
+		log.warn("Step to perform "+action+" on element "+element.getId()+ " -- "+element.getName());
 		return "simplestep"+key+action+actionInput;
 	}
 

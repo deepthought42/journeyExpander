@@ -15,6 +15,7 @@ public class LatLng extends LookseeObject {
 	public LatLng(double latitude, double longitude) {
 		setLatitude(latitude);
 		setLongitude(longitude);
+		setKey(generateKey());
 	}
 
 	public double getLatitude() {
