@@ -165,4 +165,30 @@ public class ElementStateUtils {
 			return element;
 		});
 	}
+	
+	/**
+	 * Checks if element is a link, a button element or class contains "btn or button"
+	 * @param element {@link ElementState}
+	 * 
+	 * @return true if element is a link or button element or if element class contains "btn or button"
+	 */
+	public static boolean isInteractiveElement(ElementState element) {
+		return element.getName().contentEquals("a") 
+				|| element.getName().contentEquals("button")
+				|| (element.getAttributes().containsKey("class")
+					&& (element.getAttribute("class").contains("btn")
+						|| element.getAttribute("class").contains("button")))
+				|| (element.getAttributes().containsKey("type") 
+					&& (element.getAttribute("type").contains("button")
+						|| element.getAttribute("type").contains("checkbox")
+						|| element.getAttribute("type").contains("email")
+						|| element.getAttribute("type").contains("file")
+						|| element.getAttribute("type").contains("radio")
+						|| element.getAttribute("type").contains("tel")))
+				|| element.getAttributes().containsKey("onclick");
+	}
+	
+	public static boolean isFormElement(ElementState element) {
+		return element.getXpath().contains("form");
+	}
 }

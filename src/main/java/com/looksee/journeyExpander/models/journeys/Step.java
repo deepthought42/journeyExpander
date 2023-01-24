@@ -45,6 +45,14 @@ public class Step extends LookseeObject {
 		this.endPage = page_state;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString(){
+		return "{ start = "+this.startPage+" ;     end = "+this.endPage+ " ;  key : "+this.getKey() + " }";
+	}
+	
 	@Override
 	public String generateKey() {
 		String key = "";

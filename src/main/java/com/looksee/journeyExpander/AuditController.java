@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
+import org.openqa.selenium.Dimension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,24 +46,18 @@ import com.looksee.journeyExpander.models.Domain;
 import com.looksee.journeyExpander.gcp.PubSubErrorPublisherImpl;
 import com.looksee.journeyExpander.gcp.PubSubJourneyCandidatePublisherImpl;
 import com.looksee.journeyExpander.mapper.Body;
-import com.looksee.journeyExpander.models.Browser;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageState;
 import com.looksee.journeyExpander.models.journeys.Journey;
 import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
 import com.looksee.journeyExpander.models.message.JourneyCandidateMessage;
-import com.looksee.journeyExpander.models.message.PageBuiltMessage;
 import com.looksee.journeyExpander.models.message.VerifiedJourneyMessage;
+import com.looksee.journeyExpander.services.BrowserService;
 import com.looksee.journeyExpander.services.DomainService;
 import com.looksee.journeyExpander.services.ElementStateService;
-import com.looksee.journeyExpander.services.JourneyService;
-import com.looksee.journeyExpander.services.StepExecutor;
-import com.looksee.journeyExpander.services.StepService;
 import com.looksee.utils.BrowserUtils;
-import com.looksee.journeyExpander.gcp.PubSubJourneyVerifiedPublisherImpl;
-import com.looksee.journeyExpander.gcp.PubSubPageCreatedPublisherImpl;
-import com.looksee.journeyExpander.models.enums.PathStatus;
+import com.looksee.utils.ElementStateUtils;
 
 
 // PubsubController consumes a Pub/Sub message.
@@ -76,25 +72,10 @@ public class AuditController {
 	private ElementStateService element_state_service;
 	
 	@Autowired
-	private StepService step_service;
-	
-	@Autowired
-	private JourneyService journey_service;
-	
-	@Autowired
 	private PubSubErrorPublisherImpl pubSubErrorPublisherImpl;
 	
 	@Autowired
 	private PubSubJourneyCandidatePublisherImpl journey_candidate_topic;
-	
-	@Autowired
-	private PubSubJourneyVerifiedPublisherImpl pubSubJourneyVerifiedPublisherImpl;
-	
-	@Autowired
-	private PubSubPageCreatedPublisherImpl pubSubPageCreatedPublisherImpl;
-	
-	@Autowired
-	private StepExecutor step_executor;
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public ResponseEntity<String> receiveMessage(@RequestBody Body body) 
@@ -107,14 +88,10 @@ public class AuditController {
 	    log.warn("data value :: "+target);
 	    ObjectMapper input_mapper = new ObjectMapper();
 	    VerifiedJourneyMessage journey_msg = input_mapper.readValue(target, VerifiedJourneyMessage.class);
-	    
-	    log.warn("journey order ids" + journey_msg.getJourney().getOrderedIds());
-	    log.warn("journey status :: "+journey_msg.getStatus());
-	    log.warn("journey browser :: "+journey_msg.getBrowser());
-	    
+
 	    Journey journey = journey_msg.getJourney();
 	    
-	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey);
+	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey_msg);
 
 		List<Journey> hover_interactions = new ArrayList<>();
 		//List<Journey> click_interactions = new ArrayList<>();
@@ -126,7 +103,6 @@ public class AuditController {
 			//boolean page_needs_extraction = false;
 			//start a new browser session
 			PageState journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
-			log.warn("journey result page = "+journey_result_page);
 			
 			PageState start_page = journey_steps.get(journey_steps.size()-1).getStartPage();
 			if(journey_result_page == null) {
@@ -134,7 +110,6 @@ public class AuditController {
 			}
 			
 			//if start page is external then don't expand
-			log.warn("domain id = "+journey_msg.getDomainId());
 			Domain domain = domain_service.findById(journey_msg.getDomainId()).get();
 			
 			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl()) || BrowserUtils.isExternalLink(domain.getUrl(), start_page.getUrl())) {
@@ -147,80 +122,57 @@ public class AuditController {
 			log.warn("journey last step start page = "+journey_result_page);
 			
 			//if start and end page match then it is a page load step and can be discarded in favor of a new expanded step
-			boolean page_load_step = journey_steps.get(journey_steps.size()-1).getEndPage().equals(journey_steps.get(journey_steps.size()-1).getStartPage());
+			
+			boolean page_load_step = journey_steps.get(journey_steps.size()-1).getStartPage().equals(journey_steps.get(journey_steps.size()-1).getEndPage());
 			
 			//if the page has already been expanded then don't expand the journey for this page
-			
-			
 		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
-
-		    //was page already expanded? If so then send page created message and verified journey with using 
-		    //the associated final page state
-		    if(wasPagePreviouslyExpanded(journey_result_page, journey_msg)) {
-				return new ResponseEntity<String>("Last page was already expanded. Discarding duplicate", HttpStatus.OK); 
-		    }
-			List<Step> stepsWithPage = step_service.getStepsWithStartPage(journey_result_page);
-			log.warn("steps with Page");
-			if( !stepsWithPage.isEmpty() ) {
-				
-				for(Step step : stepsWithPage) {
-					//send pageBuiltMessage with pageState and journey verified message
-					PageState page_state = step.getEndPage();
-					
-					log.warn("page state id :: " + page_state.getId());
-					
-			   		PageBuiltMessage page_built_msg = new PageBuiltMessage(journey_msg.getAccountId(),
-			   																journey_msg.getDomainAuditRecordId(),
-			   																journey_msg.getDomainId(), 
-			   																page_state.getId(),
-			   																journey_msg.getDomainAuditRecordId());
-					
-					String page_built_str = mapper.writeValueAsString(page_built_msg);
-				    pubSubPageCreatedPublisherImpl.publish(page_built_str);
-
-					if(journey_msg.getDomainAuditRecordId() >= 0) {
-						List<Step> steps = new ArrayList<>();
-						steps.add(new Step(page_state, null));
-						log.warn("adding steps to journey");
-						Journey new_journey = new Journey(steps);
-						log.warn("building journey Candidate message");
-						new_journey = journey_service.save(new_journey);
-						
-						VerifiedJourneyMessage verified_journey_msg = new VerifiedJourneyMessage(new_journey, 
-																						PathStatus.READY, 
-																						BrowserType.CHROME, 
-																						journey_msg.getDomainId(), 
-																						journey_msg.getAccountId(), 
-																						journey_msg.getDomainAuditRecordId());
-						log.warn("sending verified journey");
-						String journey_msg_str = mapper.writeValueAsString(verified_journey_msg);
-
-						pubSubJourneyVerifiedPublisherImpl.publish(journey_msg_str);
-					}
-				}
-			}
 			
+		    log.warn("expanding journey using page state leaf elements");
+			// EXPAND JOURNEY
 			List<Action> actions = new ArrayList<>();
 			actions.add(Action.CLICK);
-			actions.add(Action.MOUSE_OVER);
+			//actions.add(Action.MOUSE_OVER);
 			
 			//get all leaf elements 
 			log.warn("getting visible leaf elements for page with id = "+journey_result_page.getId());
 			List<ElementState> leaf_elements = element_state_service.getVisibleLeafElements(journey_result_page.getId());
 			log.warn(leaf_elements.size()+" leaf elements found");
 
+			//filter elements that aren't interactive such as links, buttons, etc
+			//leaf_elements = ElementStateUtils.filterElementsWithNegativePositions(leaf_elements);
+			//leaf_elements = browser_service.filterNoWidthOrHeight(leaf_elements, true);
+			
+			//Filter out non interactive elements
+			//Filter out elements that are in explored map for PageState with key
+			//Filter out form elements
+			leaf_elements = leaf_elements.parallelStream()
+											.filter(element -> element.isVisible())
+											.filter(element -> !BrowserService.isStructureTag(element.getName()))
+											.filter(element -> {
+													Dimension dimension = new Dimension(element.getWidth(), element.getHeight()); 
+													return BrowserService.hasWidthAndHeight(dimension);
+											})
+											.filter(element -> element.getXLocation() >= 0 && element.getYLocation() >= 0)
+											.filter(element -> ElementStateUtils.isInteractiveElement(element))
+											.filter(element -> !ElementStateUtils.isFormElement(element))
+											.collect(Collectors.toList());
+			
+			log.warn(leaf_elements.size()+" leaf elements after filtering");
+
+			int journey_cnt = 0;
 			for(ElementState leaf_element : leaf_elements) {
-				log.warn("journey result page key :: "+journey_result_page.getKey());
 				//check if page state is same as original page state. If not then add new ElementInteractionStep 
 				
 				for(Action action: actions) {
-					Step step = new SimpleStep(journey_result_page, 
+					SimpleStep step = new SimpleStep(journey_result_page, 
 											 	leaf_element, 
 											 	action, 
 											 	"", 
 											 	null);
 					
 					if(existsInJourney(journey, step)) {
+						log.warn("step already exists within journey");
 						continue;
 					}
 
@@ -234,22 +186,7 @@ public class AuditController {
 						steps.add(step);
 					}
 					
-					//log.warn("journey ordered ids = "+journey.getOrderedIds());
-					/*
-					if(page_needs_extraction) {
-						steps.set(steps.size()-1, step);
-						//ordered_ids.set(ordered_ids.size()-1, step.getId());
-					}
-					else {
-						steps.add(step);
-						//ordered_ids.add(step.getId());
-					}
-					*/
-					//Journey new_journey = new Journey(steps);
-					
-					List<Long> ordered_ids = new ArrayList<>(journey.getOrderedIds());
-					Journey new_journey = new Journey(steps, ordered_ids);
-					new_journey = journey_service.save(new_journey);
+					log.warn("sending steps to be verified = " + steps);
 					
 					//add journey to list of elements to explore for click or typing interactions
 					JourneyCandidateMessage candidate = new JourneyCandidateMessage(steps, 
@@ -258,13 +195,16 @@ public class AuditController {
 																					journey_msg.getAccountId(),
 																					journey_msg.getDomainAuditRecordId());
 					String candidate_json = mapper.writeValueAsString(candidate);
-					log.warn("journey candidate message = "+candidate_json);
-				    journey_candidate_topic.publish(candidate_json);
+					//log.warn("journey candidate message = "+candidate_json);
+					
+					journey_candidate_topic.publish(candidate_json);
 				    interactive_elements.add(leaf_element.getKey());
+				    journey_cnt++;
 				}
 			}
 
-			log.warn("sending "+hover_interactions.size()+ " hover interactions to Journey Manager +++");
+			log.warn("generated "+journey_cnt+" journeys to explore");
+
 			return new ResponseEntity<String>("Successfully generated journey expansions", HttpStatus.OK);
 		}
 		catch(Exception e) {
@@ -273,61 +213,14 @@ public class AuditController {
 			
 			JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 			String journey_json = mapper.writeValueAsString(journey);
-			log.warn("audit progress update = "+journey_json);
+			log.warn("Error while expanding journey = "+journey_json);
 		    pubSubErrorPublisherImpl.publish(journey_json);
 		}
 		
 		return new ResponseEntity<String>("Error occurred while expanding journey", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	private boolean wasPagePreviouslyExpanded(PageState journey_result_page, VerifiedJourneyMessage msg) 
-			throws JsonProcessingException, ExecutionException, InterruptedException 
-	{
-		List<Step> stepsWithPage = step_service.getStepsWithStartPage(journey_result_page);
-		log.warn("steps with Page = "+stepsWithPage.size()+" ...for page with id ="+journey_result_page.getId());
-		if( !stepsWithPage.isEmpty() ) {
-		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
-
-			for(Step step : stepsWithPage) {
-				//send pageBuiltMessage with pageState and journey verified message
-				PageState page_state = step.getEndPage();
-				
-				log.warn("page state id :: " + page_state.getId());
-				
-		   		PageBuiltMessage page_built_msg = new PageBuiltMessage(msg.getAccountId(),
-														   				msg.getDomainAuditRecordId(),
-														   				msg.getDomainId(), 
-		   																page_state.getId(),
-		   																msg.getDomainAuditRecordId());
-				
-				String page_built_str = mapper.writeValueAsString(page_built_msg);
-			    pubSubPageCreatedPublisherImpl.publish(page_built_str);
-
-				if(msg.getDomainAuditRecordId() >= 0) {
-					List<Step> steps = new ArrayList<>();
-					steps.add(new Step(page_state, null));
-					log.warn("adding steps to journey");
-					Journey new_journey = new Journey(steps);
-					log.warn("building journey Candidate message");
-					new_journey = journey_service.save(new_journey);
-					
-					VerifiedJourneyMessage verified_journey_msg = new VerifiedJourneyMessage(new_journey, 
-																					PathStatus.READY, 
-																					BrowserType.CHROME, 
-																					msg.getDomainId(), 
-																					msg.getAccountId(), 
-																					msg.getDomainAuditRecordId());
-					log.warn("sending verified journey");
-					String journey_msg_str = mapper.writeValueAsString(verified_journey_msg);
-
-					pubSubJourneyVerifiedPublisherImpl.publish(journey_msg_str);
-				}
-			}
-			return true; 
-		}
-		
-		return false;
-	}
+	
 
 	/**
 	 * Checks if {@link Step} exists within the given {@link Journey}
@@ -338,10 +231,8 @@ public class AuditController {
 	 * @return true if step already exists, otherwise false
 	 */
 	private boolean existsInJourney(Journey journey, Step step) {
-		log.warn("step = "+step);
 		log.warn("journey steps = "+journey.getSteps());
 		for(Step journey_step : journey.getSteps()) {
-			log.warn("journey step = "+journey_step);
 			if(journey_step == null) {
 				continue;
 			}
@@ -352,34 +243,5 @@ public class AuditController {
 		}
 		return false;
 	}
-
-	/**
-	 * 
-	 * @param journey
-	 * @param browser
-	 */
-	private void executeJourney(Journey journey, Browser browser) {
-		assert journey != null;
-		assert browser != null;
-		
-		List<Step> ordered_steps = new ArrayList<>();
-		//execute journey steps
-		for(long step_id : journey.getOrderedIds()) {
-			
-			for(Step step: journey.getSteps()) {
-				if(step.getId() == step_id) {
-					ordered_steps.add(step);
-					break;
-				}
-			}
-		}
-
-		for(Step step : ordered_steps) {
-			
-			log.warn("step :: "+step);
-			//execute step
-			step_executor.execute(browser, step);
-		}
-	}	
 
 }

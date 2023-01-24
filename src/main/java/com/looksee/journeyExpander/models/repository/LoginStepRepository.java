@@ -14,7 +14,7 @@ import com.looksee.journeyExpander.models.journeys.LoginStep;
 @Repository
 public interface LoginStepRepository extends Neo4jRepository<LoginStep, Long> {
 
-	@Query("MATCH (step:LoginStep{key:$step_key}) RETURN step")
+	@Query("MATCH (step:LoginStep{key:$step_key}) RETURN step LIMIT 1")
 	public LoginStep findByKey(@Param("step_key") String step_key);
 
 	@Query("MATCH (s:Step) WITH s MATCH (e:ElementState) WHERE id(s)=$step_id AND id(e)=$element_id MERGE (s)-[:USERNAME_INPUT]->(e) RETURN e")
