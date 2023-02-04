@@ -15,11 +15,9 @@ import com.looksee.journeyExpander.models.PageAuditRecord;
 import com.looksee.journeyExpander.models.PageState;
 import com.looksee.journeyExpander.models.Screenshot;
 import com.looksee.journeyExpander.models.enums.AuditName;
+import com.looksee.journeyExpander.models.enums.ElementClassification;
 import com.looksee.journeyExpander.models.repository.PageStateRepository;
 import com.looksee.journeyExpander.models.Audit;
-
-import io.github.resilience4j.retry.annotation.Retry;
-
 
 
 /**
@@ -106,7 +104,7 @@ public class PageStateService {
 	public Collection<ElementState> getExpandableElements(List<ElementState> elements) {
 		List<ElementState> expandable_elements = new ArrayList<>();
 		for(ElementState elem : elements) {
-			if(elem.isLeaf()) {
+			if(ElementClassification.LEAF.equals(elem.getClassification())) {
 				expandable_elements.add(elem);
 			}
 		}

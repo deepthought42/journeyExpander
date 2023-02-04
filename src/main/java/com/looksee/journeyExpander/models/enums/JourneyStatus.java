@@ -2,15 +2,19 @@ package com.looksee.journeyExpander.models.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-public enum BrowserType {
-	CHROME("chrome"), 
-	FIREFOX("firefox"), 
-	SAFARI("safari"), 
-	IE("ie");
+/**
+ * ready - ready for expansion
+ * expanded - path has already been expanded and is ready for exploration
+ */
+public enum JourneyStatus {
+	READY("READY"), 
+	EXPANDED("EXPANDED"),
+	DISCARDED("DISCARDED"),
+	EXAMINED("EXAMINED");
 	
 	private String shortName;
 
-	BrowserType(String shortName) {
+	JourneyStatus (String shortName) {
         this.shortName = shortName;
     }
 
@@ -20,11 +24,11 @@ public enum BrowserType {
     }
 
     @JsonCreator
-    public static BrowserType create(String value) {
+    public static JourneyStatus create (String value) {
         if(value == null) {
             throw new IllegalArgumentException();
         }
-        for(BrowserType v : values()) {
+        for(JourneyStatus v : values()) {
             if(value.equalsIgnoreCase(v.getShortName())) {
                 return v;
             }
