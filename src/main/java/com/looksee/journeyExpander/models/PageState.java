@@ -37,6 +37,7 @@ public class PageState extends LookseeObject {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(PageState.class);
 
+	@JsonIgnore
 	private String src;
 	private String url;
 	private String urlAfterLoading;

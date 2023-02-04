@@ -2,15 +2,16 @@ package com.looksee.journeyExpander.models.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-public enum BrowserType {
-	CHROME("chrome"), 
-	FIREFOX("firefox"), 
-	SAFARI("safari"), 
-	IE("ie");
+public enum StepType {
+	UNKNOWN("unknown"), 
+	SIMPLE("SIMPLE"), 
+	LOGIN("LOGIN"), 
+	REDIRECT("REDIRECT"),
+	LANDING("LANDING");
 	
 	private String shortName;
 
-	BrowserType(String shortName) {
+    StepType(String shortName) {
         this.shortName = shortName;
     }
 
@@ -20,11 +21,11 @@ public enum BrowserType {
     }
 
     @JsonCreator
-    public static BrowserType create(String value) {
+    public static StepType create(String value) {
         if(value == null) {
             throw new IllegalArgumentException();
         }
-        for(BrowserType v : values()) {
+        for(StepType v : values()) {
             if(value.equalsIgnoreCase(v.getShortName())) {
                 return v;
             }

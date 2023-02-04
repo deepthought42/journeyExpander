@@ -187,15 +187,15 @@ public class AuditController {
 					}
 					
 					log.warn("sending steps to be verified = " + steps);
-					
+					Journey expanded_journey = new Journey(steps);
 					//add journey to list of elements to explore for click or typing interactions
-					JourneyCandidateMessage candidate = new JourneyCandidateMessage(steps, 
+					JourneyCandidateMessage candidate = new JourneyCandidateMessage(expanded_journey, 
 																					BrowserType.CHROME,
 																					journey_msg.getDomainId(),
 																					journey_msg.getAccountId(),
 																					journey_msg.getDomainAuditRecordId());
 					String candidate_json = mapper.writeValueAsString(candidate);
-					//log.warn("journey candidate message = "+candidate_json);
+					log.warn("journey candidate message = "+candidate_json);
 					
 					journey_candidate_topic.publish(candidate_json);
 				    interactive_elements.add(leaf_element.getKey());
@@ -209,7 +209,7 @@ public class AuditController {
 		}
 		catch(Exception e) {
 			log.warn("Exception occurred while expanding journey ::   "+e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 			
 			JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 			String journey_json = mapper.writeValueAsString(journey);
@@ -231,7 +231,6 @@ public class AuditController {
 	 * @return true if step already exists, otherwise false
 	 */
 	private boolean existsInJourney(Journey journey, Step step) {
-		log.warn("journey steps = "+journey.getSteps());
 		for(Step journey_step : journey.getSteps()) {
 			if(journey_step == null) {
 				continue;

@@ -3,16 +3,21 @@ package com.looksee.journeyExpander.models.journeys;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageState;
 import com.looksee.journeyExpander.models.TestUser;
+import com.looksee.journeyExpander.models.enums.StepType;
 
 /**
  * A Step is the increment of work that start with a {@link PageState} contians an {@link ElementState} 
  * 	 that has an {@link Action} performed on it and results in an end {@link PageState}
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeName("LOGIN")
 @Node
-public class LoginStep extends Step {
+public class LoginStep extends Step{
 
 	@Relationship(type = "USES")
 	private TestUser testUser;
@@ -111,4 +116,11 @@ public class LoginStep extends Step {
 	public LoginStep clone() {
 		return new LoginStep(getStartPage(), getEndPage(), getUsernameElement(), getPasswordElement(), getSubmitElement(), getTestUser());
 	}
+
+	@Override
+	StepType getStepType() {
+		return StepType.LOGIN;
+	}
+
+	
 }

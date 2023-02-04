@@ -63,3 +63,4 @@ public class VerifiedJourneyMessage extends Message {
 		this.journey = journey;
 	}
 }
+

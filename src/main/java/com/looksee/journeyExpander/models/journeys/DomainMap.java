@@ -8,20 +8,22 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 import com.looksee.journeyExpander.models.LookseeObject;
 
 
+
+
 /**
  * Represents the series of steps taken for an end to end journey
  */
-public class JourneyMap extends LookseeObject {
+public class DomainMap extends LookseeObject {
 
-	@Relationship(type = "JOURNEY")
+	@Relationship(type = "CONTAINS")
 	private List<Journey> journeys;
 		
-	public JourneyMap() {
+	public DomainMap() {
 		setJourneys(new ArrayList<>());
 		setKey(generateKey());
 	}
 	
-	public JourneyMap(List<Journey> journeys) {
+	public DomainMap(List<Journey> journeys) {
 		setJourneys(journeys);
 		setKey(generateKey());
 	}
@@ -38,8 +40,8 @@ public class JourneyMap extends LookseeObject {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public JourneyMap clone() {
-		return new JourneyMap(new ArrayList<>(getJourneys()));
+	public DomainMap clone() {
+		return new DomainMap(new ArrayList<>(getJourneys()));
 	}
 	
 	public List<Journey> getJourneys() {
