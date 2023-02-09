@@ -68,7 +68,6 @@
 						"data-category": "[footer_nav]",
 						"data-action": "[click]"
 					},
-					"leaf": true,
 					"xlocation": 864,
 					"ylocation": 5444,
 					"renderedCssValues": {

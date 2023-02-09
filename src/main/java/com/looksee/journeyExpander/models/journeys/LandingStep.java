@@ -5,7 +5,6 @@ import com.looksee.journeyExpander.models.enums.Action;
 import com.looksee.journeyExpander.models.enums.StepType;
 
 import org.springframework.data.neo4j.core.schema.Node;
-import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -21,9 +20,6 @@ import com.looksee.journeyExpander.models.PageState;
 @Node
 public class LandingStep extends Step {
 	
-	@Relationship(type = "STARTS_WITH")
-	private PageState startPage;
-	
 	public LandingStep() {
 		super();
 	}
@@ -32,14 +28,6 @@ public class LandingStep extends Step {
 	{
 		setStartPage(start_page);
 		setKey(generateKey());
-	}
-	
-	public PageState getStartPage() {
-		return startPage;
-	}
-
-	public void setStartPage(PageState startPage) {
-		this.startPage = startPage;
 	}
 
 	@Override

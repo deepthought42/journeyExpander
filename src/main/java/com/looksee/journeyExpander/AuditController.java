@@ -49,6 +49,7 @@ import com.looksee.journeyExpander.mapper.Body;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageState;
 import com.looksee.journeyExpander.models.journeys.Journey;
+import com.looksee.journeyExpander.models.journeys.LandingStep;
 import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
 import com.looksee.journeyExpander.models.message.JourneyCandidateMessage;
@@ -100,31 +101,29 @@ public class AuditController {
 		List<Step> journey_steps = journey.getSteps();
 		log.warn("journey steps : "+journey_steps);
 		try {
-			//boolean page_needs_extraction = false;
-			//start a new browser session
-			PageState journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
+			//get last step
+			Step last_step = journey_steps.get(journey_steps.size()-1);
+			boolean page_load_step = false;
+			PageState journey_result_page = null;
 			
-			PageState start_page = journey_steps.get(journey_steps.size()-1).getStartPage();
-			if(journey_result_page == null) {
-				journey_result_page = start_page;
+			if(last_step instanceof LandingStep) {
+				//get start page as journey result page
+				page_load_step = true;
+				journey_result_page = journey_steps.get(journey_steps.size()-1).getStartPage();
 			}
-			
+			else {
+				//get end page as journey result page
+				journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
+			}
+
 			//if start page is external then don't expand
 			Domain domain = domain_service.findById(journey_msg.getDomainId()).get();
 			
-			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl()) || BrowserUtils.isExternalLink(domain.getUrl(), start_page.getUrl())) {
-				log.warn("current url is external : "+start_page.getUrl());
-				
+			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl())) {				
 				//create and save journey
 				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK); 
 			}
-			
-			log.warn("journey last step start page = "+journey_result_page);
-			
-			//if start and end page match then it is a page load step and can be discarded in favor of a new expanded step
-			
-			boolean page_load_step = journey_steps.get(journey_steps.size()-1).getStartPage().equals(journey_steps.get(journey_steps.size()-1).getEndPage());
-			
+
 			//if the page has already been expanded then don't expand the journey for this page
 		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 			
@@ -179,14 +178,13 @@ public class AuditController {
 					//add element back to service step
 					//clone journey and add this step at the end
 					List<Step> steps = new ArrayList<>(journey.getSteps());
-					if(page_load_step) {
+					if(!page_load_step) {
 						steps.set(steps.size()-1, step);
 					}
 					else {
 						steps.add(step);
 					}
 					
-					log.warn("sending steps to be verified = " + steps);
 					Journey expanded_journey = new Journey(steps);
 					//add journey to list of elements to explore for click or typing interactions
 					JourneyCandidateMessage candidate = new JourneyCandidateMessage(expanded_journey, 
