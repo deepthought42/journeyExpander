@@ -91,7 +91,7 @@ public class SimpleStep extends Step  {
 		if(getEndPage() != null) {
 			key += getEndPage().getId();
 		}
-		log.warn("Step to perform "+action+" on element "+element.getId()+ " -- "+element.getName());
+		//log.warn("Step to perform "+action+" on element "+element.getId()+ " -- "+element.getName());
 		return "simplestep"+key+action+actionInput;
 	}
 
