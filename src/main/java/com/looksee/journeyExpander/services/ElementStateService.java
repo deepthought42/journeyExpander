@@ -15,7 +15,10 @@ import com.looksee.journeyExpander.models.Domain;
 import com.looksee.journeyExpander.models.Element;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.repository.ElementStateRepository;
+import com.looksee.journeyExpander.models.repository.RuleRepository;
 import com.looksee.models.rules.Rule;
+
+import io.github.resilience4j.retry.annotation.Retry;
 
 @Service
 public class ElementStateService {
@@ -28,17 +31,27 @@ public class ElementStateService {
 	@Autowired
 	private PageStateService page_state_service;
 	
+	@Autowired
+	private RuleRepository rule_repo;
+	
 	/**
 	 * saves element state to database
+	 * 
 	 * @param element
 	 * @return saved record of element state
 	 * 
 	 * @pre element != null
 	 */
+	@Retry(name = "neoforj")
 	public ElementState save(ElementState element) {
 		assert element != null;
 
-		return element_repo.save(element);
+		ElementState element_record = element_repo.findByKey(element.getKey());
+		if(element_record == null) {
+			return element_repo.save(element);
+		}
+		
+		return element_record;
 	}
 	
 	/**
@@ -54,6 +67,7 @@ public class ElementStateService {
 		if(element_record == null){			
 			element_record = element_repo.save(element);
 		}
+		/*
 		else{
 			if(element.getScreenshotUrl() != null && !element.getScreenshotUrl().isEmpty()) {
 				element_record.setScreenshotUrl(element.getScreenshotUrl());
@@ -62,6 +76,7 @@ public class ElementStateService {
 				element_record = element_repo.save(element_record);
 			}
 		}
+		*/
 		return element_record;
 	}
 
@@ -82,15 +97,15 @@ public class ElementStateService {
 	}
 
 	public Set<Rule> getRules(String user_id, String element_key) {
-		return element_repo.getRules(user_id, element_key);
+		return rule_repo.getRules(user_id, element_key);
 	}
 
 	public Set<Rule> addRuleToFormElement(String username, String element_key, Rule rule) {
 		//Check that rule doesn't already exist
-		Rule rule_record = element_repo.getElementRule(username, element_key, rule.getKey());
+		Rule rule_record = rule_repo.getElementRule(username, element_key, rule.getKey());
 		if(rule_record == null) {
-			rule_record = element_repo.addRuleToFormElement(username, element_key, rule.getKey());
-			return element_repo.getRules(username, element_key);
+			rule_record = rule_repo.addRuleToFormElement(username, element_key, rule.getKey());
+			return rule_repo.getRules(username, element_key);
 		}
 		else {
 			throw new ExistingRuleException(rule.getType().toString());
@@ -178,10 +193,10 @@ public class ElementStateService {
 		return element_repo.findByPageStateAndXpath(page_state_key, xpath);
 	}
 
-	public List<ElementState> saveAll(List<ElementState> element_states, long page_state_id) {
-		return element_states.parallelStream()
-									   .map(element -> save(element))
-									   .collect(Collectors.toList());
+	public List<ElementState> saveAll(List<ElementState> element_states) {
+		return element_states.stream()
+						   .map(element -> save(element))
+						   .collect(Collectors.toList());
 	}
 
 	/**
