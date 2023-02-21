@@ -42,7 +42,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.looksee.journeyExpander.models.enums.Action;
 import com.looksee.journeyExpander.models.enums.BrowserType;
+import com.looksee.journeyExpander.models.enums.JourneyStatus;
 import com.looksee.journeyExpander.models.Domain;
+import com.looksee.journeyExpander.models.journeys.DomainMap;
 import com.looksee.journeyExpander.gcp.PubSubErrorPublisherImpl;
 import com.looksee.journeyExpander.gcp.PubSubJourneyCandidatePublisherImpl;
 import com.looksee.journeyExpander.mapper.Body;
@@ -54,9 +56,12 @@ import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
 import com.looksee.journeyExpander.models.message.JourneyCandidateMessage;
 import com.looksee.journeyExpander.models.message.VerifiedJourneyMessage;
+import com.looksee.journeyExpander.services.AuditRecordService;
 import com.looksee.journeyExpander.services.BrowserService;
+import com.looksee.journeyExpander.services.DomainMapService;
 import com.looksee.journeyExpander.services.DomainService;
 import com.looksee.journeyExpander.services.ElementStateService;
+import com.looksee.journeyExpander.services.JourneyService;
 import com.looksee.utils.BrowserUtils;
 import com.looksee.utils.ElementStateUtils;
 
@@ -71,6 +76,15 @@ public class AuditController {
 	
 	@Autowired
 	private ElementStateService element_state_service;
+	
+	@Autowired
+	private JourneyService journey_service;
+	
+	@Autowired
+	private DomainMapService domain_map_service;
+	
+	@Autowired
+	private AuditRecordService audit_record_service;
 	
 	@Autowired
 	private PubSubErrorPublisherImpl pubSubErrorPublisherImpl;
@@ -185,7 +199,29 @@ public class AuditController {
 						steps.add(step);
 					}
 					
-					Journey expanded_journey = new Journey(steps);
+					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
+					expanded_journey.setCandidateKey(expanded_journey.generateKey());
+					Journey journey_record = journey_service.findByCandidateKey(expanded_journey.getCandidateKey());
+					if(journey_record == null) {
+						journey_record = journey_service.save(expanded_journey);
+						
+						//add journey to domain map
+						DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
+						if(domain_map == null) {
+							domain_map = domain_map_service.save(new DomainMap());
+							log.warn("adding domain map to audit record = " + journey_msg.getDomainAuditRecordId());
+							audit_record_service.addDomainMap(journey_msg.getDomainAuditRecordId(), domain_map.getId());
+						}
+						domain_map_service.addJourneyToDomainMap(journey.getId(), domain_map.getId());
+						
+					}
+					else {
+						journey_record.setSteps(expanded_journey.getSteps());
+						expanded_journey = journey_record;
+					}
+					
+					
+					
 					//add journey to list of elements to explore for click or typing interactions
 					JourneyCandidateMessage candidate = new JourneyCandidateMessage(expanded_journey, 
 																					BrowserType.CHROME,

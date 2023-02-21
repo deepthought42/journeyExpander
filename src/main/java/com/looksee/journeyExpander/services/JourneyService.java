@@ -35,5 +35,9 @@ public class JourneyService {
 		journey_record.setSteps(journey.getSteps());
 		return journey_record;	
 	}
+
+	public Journey findByCandidateKey(String candidateKey) {
+		return journey_repo.findByCandidateKey(candidateKey);
+	}
 	
 }

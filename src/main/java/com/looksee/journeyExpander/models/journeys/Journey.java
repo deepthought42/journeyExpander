@@ -8,12 +8,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.looksee.journeyExpander.models.LookseeObject;
+import com.looksee.journeyExpander.models.enums.JourneyStatus;
 
 
 /**
  * Represents the series of steps taken for an end to end journey
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Node
 public class Journey extends LookseeObject {
 
@@ -21,6 +24,8 @@ public class Journey extends LookseeObject {
 	private List<Step> steps;
 	
 	private List<Long> orderedIds;
+	private String candidateKey;
+	private String status;
 	
 	public Journey() {
 		setSteps(new ArrayList<>());
@@ -28,7 +33,7 @@ public class Journey extends LookseeObject {
 		setKey(generateKey());
 	}
 	
-	public Journey(List<Step> steps) {
+	public Journey(List<Step> steps, JourneyStatus status) {
 		List<Long> ordered_ids = steps.stream()
 									  .map(step -> step.getId())
 									  .filter(id -> id != null)
@@ -38,7 +43,9 @@ public class Journey extends LookseeObject {
 		setKey(generateKey());
 	}
 	
-	public Journey(List<Step> steps, List<Long> ordered_keys) {
+	public Journey(List<Step> steps, 
+				   List<Long> ordered_keys, 
+				   JourneyStatus status) {
 		setSteps(steps);
 		setOrderedIds(ordered_keys);
 		setKey(generateKey());
@@ -57,15 +64,25 @@ public class Journey extends LookseeObject {
 	 */
 	@Override
 	public Journey clone() {
-		return new Journey(new ArrayList<>(getSteps()), new ArrayList<>(getOrderedIds()));
+		return new Journey(new ArrayList<>(getSteps()), new ArrayList<>(getOrderedIds()), null);
 	}
 	
 	public List<Step> getSteps() {
 		return steps;
 	}
 
+	/**
+	 * Sets {@link Step} sequence and updates ordered ID list
+	 * @param steps
+	 */
 	public void setSteps(List<Step> steps) {
 		this.steps = steps;
+		
+		List<Long> ordered_ids = steps.stream()
+									  .map(step -> step.getId())
+									  .filter(id -> id != null)
+									  .collect(Collectors.toList());
+		setOrderedIds(ordered_ids);
 	}
 
 	public boolean addStep(SimpleStep step) {
@@ -78,5 +95,21 @@ public class Journey extends LookseeObject {
 	
 	public void setOrderedIds(List<Long> ordered_ids) {
 		this.orderedIds = ordered_ids;
+	}
+
+	public String getCandidateKey() {
+		return candidateKey;
+	}
+
+	public void setCandidateKey(String candidateKey) {
+		this.candidateKey = candidateKey;
+	}
+
+	public JourneyStatus getStatus() {
+		return JourneyStatus.create(status);
+	}
+
+	public void setStatus(JourneyStatus status) {
+		this.status = status.toString();
 	}
 }
