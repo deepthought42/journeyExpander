@@ -204,7 +204,7 @@ public class AuditController {
 					Journey journey_record = journey_service.findByCandidateKey(expanded_journey.getCandidateKey());
 					if(journey_record == null) {
 						journey_record = journey_service.save(expanded_journey);
-						
+						expanded_journey.setId(journey_record.getId());
 						//add journey to domain map
 						DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
 						if(domain_map == null) {

@@ -28,26 +28,37 @@ public class Journey extends LookseeObject {
 	private String status;
 	
 	public Journey() {
+		super();
 		setSteps(new ArrayList<>());
 		setOrderedIds(new ArrayList<>());
 		setKey(generateKey());
 	}
 	
 	public Journey(List<Step> steps, JourneyStatus status) {
+		super();
 		List<Long> ordered_ids = steps.stream()
 									  .map(step -> step.getId())
 									  .filter(id -> id != null)
 									  .collect(Collectors.toList());
 		setSteps(steps);
 		setOrderedIds(ordered_ids);
+		setStatus(status);
+		if(JourneyStatus.CANDIDATE.equals(status)) {
+			setCandidateKey(generateKey());
+		}
 		setKey(generateKey());
 	}
 	
 	public Journey(List<Step> steps, 
-				   List<Long> ordered_keys, 
+				   List<Long> ordered_ids, 
 				   JourneyStatus status) {
+		super();
 		setSteps(steps);
-		setOrderedIds(ordered_keys);
+		setOrderedIds(ordered_ids);
+		setStatus(status);
+		if(JourneyStatus.CANDIDATE.equals(status)) {
+			setCandidateKey(generateKey());
+		}
 		setKey(generateKey());
 	}
 	

@@ -5,12 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.neo4j.core.schema.Node;
+
 import com.looksee.journeyExpander.models.enums.AuditLevel;
+import com.looksee.journeyExpander.models.enums.AuditName;
 import com.looksee.journeyExpander.models.enums.ExecutionStatus;
 
 /**
  * Record detailing an set of {@link Audit audits}.
  */
+@Node
 public class AuditRecord extends LookseeObject {
 	private String url;
 	
@@ -33,6 +37,9 @@ public class AuditRecord extends LookseeObject {
 
 	private String targetUserAge;
 	private String targetUserEducation;
+	
+	private List<AuditName> auditLabels;
+
 
 	//DESIGN SYSTEM VALUES
 	private List<String> colors;
@@ -217,6 +224,14 @@ public class AuditRecord extends LookseeObject {
 
 	public void setStatusMessage(String status_message) {
 		this.statusMessage = status_message;
+	}
+
+	public List<AuditName> getAuditLabels() {
+		return auditLabels;
+	}
+
+	public void setAuditLabels(List<AuditName> auditLabels) {
+		this.auditLabels = auditLabels;
 	}
 	
 	@Override
