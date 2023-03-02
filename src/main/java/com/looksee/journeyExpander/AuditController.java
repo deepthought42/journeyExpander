@@ -200,9 +200,10 @@ public class AuditController {
 					}
 					
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
-					expanded_journey.setCandidateKey(expanded_journey.generateKey());
 					Journey journey_record = journey_service.findByCandidateKey(expanded_journey.getCandidateKey());
 					if(journey_record == null) {
+						log.warn("candidate journey is set as = "+expanded_journey.getCandidateKey());
+						
 						journey_record = journey_service.save(expanded_journey);
 						expanded_journey.setId(journey_record.getId());
 						//add journey to domain map
