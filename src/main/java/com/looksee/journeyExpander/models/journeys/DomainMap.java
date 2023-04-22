@@ -3,6 +3,8 @@ package com.looksee.journeyExpander.models.journeys;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.looksee.journeyExpander.models.LookseeObject;
@@ -13,6 +15,7 @@ import com.looksee.journeyExpander.models.LookseeObject;
 /**
  * Represents the series of steps taken for an end to end journey
  */
+@Node
 public class DomainMap extends LookseeObject {
 
 	@Relationship(type = "CONTAINS")

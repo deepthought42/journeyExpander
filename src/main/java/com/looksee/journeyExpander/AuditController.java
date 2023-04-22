@@ -62,6 +62,7 @@ import com.looksee.journeyExpander.services.DomainMapService;
 import com.looksee.journeyExpander.services.DomainService;
 import com.looksee.journeyExpander.services.ElementStateService;
 import com.looksee.journeyExpander.services.JourneyService;
+import com.looksee.journeyExpander.services.StepService;
 import com.looksee.utils.BrowserUtils;
 import com.looksee.utils.ElementStateUtils;
 
@@ -85,6 +86,9 @@ public class AuditController {
 	
 	@Autowired
 	private AuditRecordService audit_record_service;
+	
+	@Autowired
+	private StepService step_service;
 	
 	@Autowired
 	private PubSubErrorPublisherImpl pubSubErrorPublisherImpl;
@@ -192,31 +196,44 @@ public class AuditController {
 					//add element back to service step
 					//clone journey and add this step at the end
 					List<Step> steps = new ArrayList<>(journey.getSteps());
-					if(!page_load_step) {
+					Step new_step = step_service.save(step);
+					step.setId(new_step.getId());
+					steps.add(step);
+/*
+					if(page_load_step) {
 						steps.set(steps.size()-1, step);
 					}
 					else {
 						steps.add(step);
 					}
+					*/
+					DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
+					log.warn("Domain map = "+domain_map);
+					
+					if(domain_map == null) {
+						domain_map = domain_map_service.save(new DomainMap());
+						log.warn("adding domain map to audit record = " + journey_msg.getDomainAuditRecordId());
+						audit_record_service.addDomainMap(journey_msg.getDomainAuditRecordId(), domain_map.getId());
+					}
 					
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
 					Journey journey_record = journey_service.findByCandidateKey(expanded_journey.getCandidateKey());
+					log.warn("journey record candidate key = "+expanded_journey.getCandidateKey());
+					log.warn("journey is null = " + (journey_record == null));
+					
 					if(journey_record == null) {
 						log.warn("candidate journey is set as = "+expanded_journey.getCandidateKey());
 						
 						journey_record = journey_service.save(expanded_journey);
 						expanded_journey.setId(journey_record.getId());
 						//add journey to domain map
-						DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
-						if(domain_map == null) {
-							domain_map = domain_map_service.save(new DomainMap());
-							log.warn("adding domain map to audit record = " + journey_msg.getDomainAuditRecordId());
-							audit_record_service.addDomainMap(journey_msg.getDomainAuditRecordId(), domain_map.getId());
-						}
-						domain_map_service.addJourneyToDomainMap(journey.getId(), domain_map.getId());
+
+						log.warn("adding journey to domain map");
+						domain_map_service.addJourneyToDomainMap(expanded_journey.getId(), domain_map.getId());
 						
 					}
 					else {
+						log.warn("journey record found");
 						journey_record.setSteps(expanded_journey.getSteps());
 						expanded_journey = journey_record;
 					}
@@ -228,7 +245,8 @@ public class AuditController {
 																					BrowserType.CHROME,
 																					journey_msg.getDomainId(),
 																					journey_msg.getAccountId(),
-																					journey_msg.getDomainAuditRecordId());
+																					journey_msg.getDomainAuditRecordId(),
+																					domain_map.getId());
 					String candidate_json = mapper.writeValueAsString(candidate);
 					log.warn("journey candidate message = "+candidate_json);
 					
