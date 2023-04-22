@@ -31,6 +31,7 @@ public class Journey extends LookseeObject {
 		super();
 		setSteps(new ArrayList<>());
 		setOrderedIds(new ArrayList<>());
+		setCandidateKey(generateCandidateKey());
 		setKey(generateKey());
 	}
 	
@@ -40,13 +41,18 @@ public class Journey extends LookseeObject {
 									  .map(step -> step.getId())
 									  .filter(id -> id != null)
 									  .collect(Collectors.toList());
+
 		setSteps(steps);
 		setOrderedIds(ordered_ids);
 		setStatus(status);
+		
 		if(JourneyStatus.CANDIDATE.equals(status)) {
 			setCandidateKey(generateCandidateKey());
+			setKey(generateKey());
 		}
-		setKey(generateKey());
+		else {
+			setKey(generateKey());
+		}
 	}
 	
 	public Journey(List<Step> steps, 
@@ -58,8 +64,11 @@ public class Journey extends LookseeObject {
 		setStatus(status);
 		if(JourneyStatus.CANDIDATE.equals(status)) {
 			setCandidateKey(generateCandidateKey());
+			setKey(generateKey());
 		}
-		setKey(generateKey());
+		else {
+			setKey(generateKey());
+		}
 	}
 	
 	/**

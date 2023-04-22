@@ -27,17 +27,28 @@ public class JourneyService {
 	}
 	
 	public Journey save(Journey journey) {
+		log.warn("retrieving journey record with key = "+journey.getKey());
 		Journey journey_record = journey_repo.findByKey(journey.getKey());
 		if(journey_record == null) {
+			log.warn("journey record with key not found = "+journey.getKey());
 			journey_record = journey_repo.findByCandidateKey(journey.getCandidateKey());
 			if(journey_record == null) {
 				journey_record = journey_repo.save(journey);
 			}
 			else {
 				journey_record.setKey(journey.getKey());
+				journey_record.setOrderedIds(journey.getOrderedIds());
+				journey_record.setStatus(journey.getStatus());
 				journey_repo.save(journey_record);
 			}
 		}
+		else {
+			journey_record.setKey(journey.getKey());
+			journey_record.setOrderedIds(journey.getOrderedIds());
+			journey_record.setStatus(journey.getStatus());
+			journey_repo.save(journey_record);
+		}
+		
 		return journey_record;
 	}
 

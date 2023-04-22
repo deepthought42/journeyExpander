@@ -8,6 +8,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.looksee.journeyExpander.models.enums.BrowserType;
 import com.looksee.journeyExpander.services.BrowserService;
 
@@ -32,12 +34,13 @@ import com.looksee.journeyExpander.services.BrowserService;
  * A reference to a web page
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Node
 public class PageState extends LookseeObject {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(PageState.class);
 
-	@JsonIgnore
+	//@JsonIgnore
 	private String src;
 	private String url;
 	private String urlAfterLoading;
@@ -353,11 +356,11 @@ public class PageState extends LookseeObject {
 	}
 
 	public String getSrc() {
-		return src;
+		return new String(Base64.getDecoder().decode(src));
 	}
 
 	public void setSrc(String src) {
-		this.src = src;
+		this.src = Base64.getEncoder().encodeToString(src.getBytes());
 	}
 
 	public long getScrollXOffset() {
