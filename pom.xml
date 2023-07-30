@@ -110,6 +110,13 @@
     		<version>2.1.5</version>
    		</dependency>
 		
+		<!-- https://mvnrepository.com/artifact/com.google.cloud/spring-cloud-gcp-starter-secretmanager -->
+		<dependency>
+		    <groupId>com.google.cloud</groupId>
+		    <artifactId>spring-cloud-gcp-starter-secretmanager</artifactId>
+		    <version>4.3.0</version>
+		</dependency>
+		
 		<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-gcp-startegoogler-pubsub -->
 		<!--
 		<dependency>
@@ -250,14 +257,9 @@
 	    	<groupId>org.seleniumhq.selenium</groupId>
 	        <artifactId>selenium-java</artifactId>
 	        <version>${selenium-version}</version>
-	        <exclusions>
-			    <exclusion>
-			        <groupId>javax.servlet</groupId>
-			        <artifactId>servlet-api</artifactId>
-			    </exclusion>
-			</exclusions>
 	    </dependency>
 	    
+
 	    <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-server -->
 		<dependency>
 		    <groupId>org.seleniumhq.selenium</groupId>

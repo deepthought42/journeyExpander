@@ -75,7 +75,7 @@ public class PageState extends LookseeObject {
 
 	public PageState() {
 		super();
-		setElements(new ArrayList<>());
+		//setElements(new ArrayList<>());
 		setKeywords(new HashSet<>());
 		setScriptUrls(new HashSet<>());
 		setStylesheetUrls(new HashSet<>());
@@ -282,6 +282,9 @@ public class PageState extends LookseeObject {
 	}
 
 	public void addElement(ElementState element) {
+		if(getElements() == null) {
+			setElements(new ArrayList<>());
+		}
 		this.elements.add(element);
 	}	
 

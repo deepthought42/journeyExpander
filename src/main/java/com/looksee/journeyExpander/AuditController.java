@@ -60,8 +60,8 @@ import com.looksee.journeyExpander.services.AuditRecordService;
 import com.looksee.journeyExpander.services.BrowserService;
 import com.looksee.journeyExpander.services.DomainMapService;
 import com.looksee.journeyExpander.services.DomainService;
-import com.looksee.journeyExpander.services.ElementStateService;
 import com.looksee.journeyExpander.services.JourneyService;
+import com.looksee.journeyExpander.services.PageStateService;
 import com.looksee.journeyExpander.services.StepService;
 import com.looksee.utils.BrowserUtils;
 import com.looksee.utils.ElementStateUtils;
@@ -74,10 +74,7 @@ public class AuditController {
 	
 	@Autowired
 	private DomainService domain_service;
-	
-	@Autowired
-	private ElementStateService element_state_service;
-	
+
 	@Autowired
 	private JourneyService journey_service;
 	
@@ -86,6 +83,9 @@ public class AuditController {
 	
 	@Autowired
 	private AuditRecordService audit_record_service;
+	
+	@Autowired
+	private PageStateService page_state_service;
 	
 	@Autowired
 	private StepService step_service;
@@ -121,19 +121,21 @@ public class AuditController {
 		try {
 			//get last step
 			Step last_step = journey_steps.get(journey_steps.size()-1);
-			boolean page_load_step = false;
+			//boolean page_load_step = false;
 			PageState journey_result_page = null;
 			
 			if(last_step instanceof LandingStep) {
 				//get start page as journey result page
-				page_load_step = true;
+				//page_load_step = true;
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getStartPage();
+				log.warn("LANDING STEP with element count "+journey_result_page.getElements());
 			}
 			else {
 				//get end page as journey result page
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
+				log.warn("SIMPLE STEP with element count "+journey_result_page.getElements());
 			}
-
+			
 			//if start page is external then don't expand
 			Domain domain = domain_service.findById(journey_msg.getDomainId()).get();
 			
@@ -141,6 +143,12 @@ public class AuditController {
 				//create and save journey
 				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK); 
 			}
+			log.warn("(before load) start page element count = "+journey_result_page.getElements());
+
+			List<ElementState> elements = page_state_service.getElementStates(journey_result_page.getId());
+			journey_result_page.setElements(elements);
+			
+			log.warn("(after load) start page element count = "+journey_result_page.getElements());
 
 			//if the page has already been expanded then don't expand the journey for this page
 		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
@@ -153,12 +161,10 @@ public class AuditController {
 			
 			//get all leaf elements 
 			log.warn("getting visible leaf elements for page with id = "+journey_result_page.getId());
-			List<ElementState> leaf_elements = element_state_service.getVisibleLeafElements(journey_result_page.getId());
-			log.warn(leaf_elements.size()+" leaf elements found");
+			//List<ElementState> leaf_elements = element_state_service.getVisibleLeafElements(journey_result_page.getId());
+			List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
 
-			//filter elements that aren't interactive such as links, buttons, etc
-			//leaf_elements = ElementStateUtils.filterElementsWithNegativePositions(leaf_elements);
-			//leaf_elements = browser_service.filterNoWidthOrHeight(leaf_elements, true);
+			log.warn(leaf_elements.size()+" leaf elements found");
 			
 			//Filter out non interactive elements
 			//Filter out elements that are in explored map for PageState with key
@@ -170,9 +176,14 @@ public class AuditController {
 													Dimension dimension = new Dimension(element.getWidth(), element.getHeight()); 
 													return BrowserService.hasWidthAndHeight(dimension);
 											})
-											.filter(element -> element.getXLocation() >= 0 && element.getYLocation() >= 0)
-											.filter(element -> ElementStateUtils.isInteractiveElement(element))
-											.filter(element -> !ElementStateUtils.isFormElement(element))
+											.collect(Collectors.toList());
+
+			log.warn(leaf_elements.size()+" leaf elements after round 1 filtering");
+			leaf_elements = leaf_elements.parallelStream().filter(element -> element.getXLocation() >= 0 && element.getYLocation() >= 0)
+															.collect(Collectors.toList());
+			log.warn(leaf_elements.size()+" leaf elements after round 2 filtering");
+			
+			leaf_elements = leaf_elements.parallelStream().filter(element -> !ElementStateUtils.isFormElement(element))
 											.collect(Collectors.toList());
 			
 			log.warn(leaf_elements.size()+" leaf elements after filtering");
@@ -188,6 +199,7 @@ public class AuditController {
 											 	"", 
 											 	null);
 					
+					log.warn("start page element count = "+journey_result_page.getElements());
 					if(existsInJourney(journey, step)) {
 						log.warn("step already exists within journey");
 						continue;
@@ -196,17 +208,10 @@ public class AuditController {
 					//add element back to service step
 					//clone journey and add this step at the end
 					List<Step> steps = new ArrayList<>(journey.getSteps());
-					Step new_step = step_service.save(step);
-					step.setId(new_step.getId());
+					//Step new_step = step_service.save(step);
+					//step.setId(new_step.getId());
 					steps.add(step);
-/*
-					if(page_load_step) {
-						steps.set(steps.size()-1, step);
-					}
-					else {
-						steps.add(step);
-					}
-					*/
+
 					DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
 					log.warn("Domain map = "+domain_map);
 					
@@ -237,8 +242,6 @@ public class AuditController {
 						journey_record.setSteps(expanded_journey.getSteps());
 						expanded_journey = journey_record;
 					}
-					
-					
 					
 					//add journey to list of elements to explore for click or typing interactions
 					JourneyCandidateMessage candidate = new JourneyCandidateMessage(expanded_journey, 
