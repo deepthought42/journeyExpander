@@ -85,8 +85,8 @@ public class SimpleStep extends Step  {
 		if(getStartPage() != null) {
 			key += getStartPage().getId();
 		}
-		if(element != null) {
-			key += element.getId();
+		if(getElementState() != null) {
+			key += getElementState().getId();
 		}
 		if(getEndPage() != null) {
 			key += getEndPage().getId();

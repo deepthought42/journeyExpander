@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.looksee.journeyExpander.gcp.ImageSafeSearchAnnotation;
 import com.looksee.journeyExpander.models.enums.ElementClassification;
 
@@ -32,9 +33,9 @@ public class ImageElementState extends ElementState {
 	@Relationship(type="HAS")
 	private ImageSearchAnnotation imageSearchSet;
 	
-	private String adult;
-	private String racy;
-	private String violence;
+	private String adultContent;
+	private String racyContent;
+	private String violenceContent;
 	
 	public ImageElementState() {
 		super();
@@ -128,6 +129,7 @@ public class ImageElementState extends ElementState {
 		this.imageSearchSet = image_search_set;
 	}
 
+	@JsonIgnore
 	public boolean isAdultContent() {
 		if(getAdult() == null || getRacy() == null) {
 			return false;
@@ -136,32 +138,33 @@ public class ImageElementState extends ElementState {
 				|| getRacy().contains("LIKELY");					
 	}
 	
+	@JsonIgnore
 	public boolean isViolentContent() {
 		return getViolence().contains("LIKELY");
 					
 	}
 
 	public String getAdult() {
-		return adult;
+		return adultContent;
 	}
 
 	public void setAdult(String adult) {
-		this.adult = adult;
+		this.adultContent = adult;
 	}
 
 	public String getRacy() {
-		return racy;
+		return racyContent;
 	}
 
 	public void setRacy(String racy) {
-		this.racy = racy;
+		this.racyContent = racy;
 	}
 
 	public String getViolence() {
-		return violence;
+		return violenceContent;
 	}
 
 	public void setViolence(String violence) {
-		this.violence = violence;
+		this.violenceContent = violence;
 	}
 }

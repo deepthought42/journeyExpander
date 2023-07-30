@@ -1,0 +1,106 @@
+########
+#  
+#    STAGING ENVIRONMENT SETTINGS
+#
+########
+
+server.port=8080
+#server.port=443
+spring.mvc.throw-exception-if-no-handler-found=true
+spring.resources.add-mappings=false
+spring.http.encoding.force-response=true
+
+management.server.port=80
+management.server.ssl.enabled=false
+
+#logging.level.*=INFO
+logging.file=look-see.log
+
+# Tell Spring Security (if used) to require requests over HTTPS
+#security.require-ssl=true
+#server.ssl.enabled=true
+
+# The format used for the keystore 
+#server.ssl.key-store-type=PKCS12
+
+# The path to the keystore containing the certificate
+#server.ssl.key-store=/etc/certs/api_key.p12
+# The password used to generate the certificate
+#server.ssl.key-store-password=G!nvu4u812
+#server.ssl.keyAlias=1
+
+spring.mail.host=email-smtp.us-east-1.amazonaws.com
+spring.mail.username=AKIAIFMYVAQFASYCGXPA
+spring.mail.password=BBdxu5oKv9GRFRKIytwrb9NmeYPGtPlJCrES6vEb2TFX
+spring.mail.properties.mail.transport.protocol=smtps
+spring.mail.properties.mail.smtp.port=587
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+#GCP HOSTED STAGING
+spring.data.neo4j.uri=bolt://10.128.0.5:7687
+spring.data.neo4j.username=neo4j
+spring.data.neo4j.password=bt4Suwro
+spring.data.neo4j.database=neo4j
+
+
+logging.level.org.springframework.data.neo4j=WARN
+
+slackBotToken=xoxp-108556442033-109232206338-691872402772-93cf8463de46a9511da8d03928ed48cf
+slackIncomingWebhookUrl=https://hooks.slack.com/services/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
+
+#Google cloud credentials
+#spring.cloud.gcp.credentials.location=file:C:/Users/brand/OneDrive/Documents/GitHub/WebTestVisualizer/GCP-MyFirstProject-1c31159db52c.json
+#spring.cloud.gcp.credentials.location=file:src/main/resources/GCP-MyFirstProject-1c31159db52c.json
+
+#####
+# Segment
+#####
+#segment.analytics.writeKey=2fhUNnmoIEy5DZj9yhysv9j7QQcgWQlT
+
+#####
+# STRIPE
+#####
+
+stripe.agency_basic_price_id=price_1JuNRWKuRH6u2PgWXdcWmZUD
+stripe.agency_pro_price_id=price_1JuMz1KuRH6u2PgWHtAHwxqZ
+stripe.company_basic_price_id=price_1JsVosKuRH6u2PgWPSMNuPIy
+stripe.company_pro_price_id=price_1JuNJoKuRH6u2PgWK9rJZjnr
+stripe.secretKey=sk_test_51InjNRKuRH6u2PgWEVCoiKQ445yYNP3rEm1lxlZkIAsWSk0QLQ0YP4DU2YozHNU6v0RBGTbLvesquIEHuRg3VpET00eciDZ5ZC
+stripe.checkout_success_url=https://app-stage.look-see.com/domains?session_id={CHECKOUT_SESSION_ID}
+stripe.checkout_cancel_url=https://app-stage.look-see.com/plans
+
+#####
+#  Auth0
+#####
+
+
+# SENDGRID CONFIG (SendGridAutoConfiguration)
+spring.sendgrid.api-key= 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
+ # SendGrid API Key
+
+#spring.sendgrid.username: # SendGrid account username (if API key not provided).
+#spring.sendgrid.password: # SendGrid account password.
+
+#spring.sendgrid.proxy.host: # SendGrid proxy host. (optional)
+#spring.sendgrid.proxy.port: # SendGrid proxy port. (optional)
+
+########
+#  GCP Pub/Sub
+########
+
+# Bind the Supplier bean `sendMessageToTopicOne` to the Pub/Sub topic
+# `topic-one`. If the topic does not exist, one will be created.
+#spring.cloud.stream.bindings.sendMessageToPageAuditTopic-out-0.destination=page-audit
+spring.cloud.gcp.project-id=staticweb-test
+pubsub.page_built=projects/cosmic-envoy-280619/topics/PageCreated
+pubsub.error_topic=projects/cosmic-envoy-280619/topics/AuditError
+pubsub.journey_candidate=projects/cosmic-envoy-280619/topics/JourneyCandidate
+pubsub.journey_verified=projects/cosmic-envoy-280619/topics/JourneyVerified
+
+#####
+#  Integration
+#####
+
+integrations.product-board.private_key=PROCUCT_KEY_HERE
+
