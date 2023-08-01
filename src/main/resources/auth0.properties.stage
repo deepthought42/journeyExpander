@@ -1,0 +1,18 @@
+##  STAGING
+auth0.domain=look-see-dev.us.auth0.com
+auth0.issuer=https://look-see-dev.us.auth0.com/
+
+auth0.client_id=8HRxTIHb0uJ9FRnosRJhoMOvXwQDTRGG
+auth0.client_secret=eF-ifoh6xNW6rWtdtbnZ8FVCVDwU46ELNpYc0H7xRCLXRnIpEGKCoHS20nmNLZB9
+
+## custom auth0 api
+auth0.audience=https://api-stage.look-see.com
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https://look-see-dev.us.auth0.com/
+#spring.security.oauth2.client.registration.auth0.client-id=XDBmgKXOcinSAijVxOzTuShQPvOu2sv2
+#spring.security.oauth2.client.registration.auth0.client-secret=d9xvD-M8rG0MeOU-q6wmfQGtQR-4BTTgtld4YTf84dwreDj7iLboqeLbOXvIGBiv
+
+auth0.securedRoute= /*
+auth0.base64EncodedSecret: false
+auth0.authorityStrategy: ROLES
+auth0.defaultAuth0ApiSecurityEnabled: true
+auth0.signingAlgorithm: RS256

@@ -200,6 +200,7 @@ public class AuditController {
 											 	null);
 					
 					log.warn("start page element count = "+journey_result_page.getElements());
+					
 					if(existsInJourney(journey, step)) {
 						log.warn("step already exists within journey");
 						continue;
@@ -222,7 +223,7 @@ public class AuditController {
 					}
 					
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
-					Journey journey_record = journey_service.findByCandidateKey(expanded_journey.getCandidateKey());
+					Journey journey_record = journey_service.findByCandidateKey(journey_msg.getDomainAuditRecordId(), journey.getCandidateKey());
 					log.warn("journey record candidate key = "+expanded_journey.getCandidateKey());
 					log.warn("journey is null = " + (journey_record == null));
 					
