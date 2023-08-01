@@ -37,13 +37,8 @@ public class Journey extends LookseeObject {
 	
 	public Journey(List<Step> steps, JourneyStatus status) {
 		super();
-		List<Long> ordered_ids = steps.stream()
-									  .map(step -> step.getId())
-									  .filter(id -> id != null)
-									  .collect(Collectors.toList());
 
 		setSteps(steps);
-		setOrderedIds(ordered_ids);
 		setStatus(status);
 		
 		if(JourneyStatus.CANDIDATE.equals(status)) {
@@ -85,7 +80,6 @@ public class Journey extends LookseeObject {
 	public String generateCandidateKey() {
 		List<String> ordered_keys = getSteps().stream()
 								  		.map(step -> step.getKey())
-								  		.filter(id -> id != null)
 								  		.collect(Collectors.toList());
 		
 		return "journey"+org.apache.commons.codec.digest.DigestUtils.sha256Hex(StringUtils.join(ordered_keys, "|"));
@@ -112,7 +106,6 @@ public class Journey extends LookseeObject {
 		
 		List<Long> ordered_ids = steps.stream()
 									  .map(step -> step.getId())
-									  .filter(id -> id != null)
 									  .collect(Collectors.toList());
 		setOrderedIds(ordered_ids);
 	}

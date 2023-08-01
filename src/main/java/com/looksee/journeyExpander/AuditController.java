@@ -112,10 +112,9 @@ public class AuditController {
 	    
 	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey_msg);
 
-		List<Journey> hover_interactions = new ArrayList<>();
+		//List<Journey> hover_interactions = new ArrayList<>();
 		//List<Journey> click_interactions = new ArrayList<>();
 		List<String> interactive_elements = new ArrayList<>();
-
 		List<Step> journey_steps = journey.getSteps();
 		log.warn("journey steps : "+journey_steps);
 		try {
@@ -145,8 +144,8 @@ public class AuditController {
 			}
 			log.warn("(before load) start page element count = "+journey_result_page.getElements());
 
-			List<ElementState> elements = page_state_service.getElementStates(journey_result_page.getId());
-			journey_result_page.setElements(elements);
+			List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
+			journey_result_page.setElements(leaf_elements);
 			
 			log.warn("(after load) start page element count = "+journey_result_page.getElements());
 
@@ -162,7 +161,7 @@ public class AuditController {
 			//get all leaf elements 
 			log.warn("getting visible leaf elements for page with id = "+journey_result_page.getId());
 			//List<ElementState> leaf_elements = element_state_service.getVisibleLeafElements(journey_result_page.getId());
-			List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
+			//List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
 
 			log.warn(leaf_elements.size()+" leaf elements found");
 			
@@ -194,10 +193,10 @@ public class AuditController {
 				
 				for(Action action: actions) {
 					SimpleStep step = new SimpleStep(journey_result_page, 
-											 	leaf_element, 
-											 	action, 
-											 	"", 
-											 	null);
+												 	leaf_element, 
+												 	action, 
+												 	"", 
+												 	null);
 					
 					log.warn("start page element count = "+journey_result_page.getElements());
 					
@@ -206,11 +205,22 @@ public class AuditController {
 						continue;
 					}
 
+					if(!shouldBeExpanded(journey)) {
+						log.warn("journey should not be expanded");
+						continue;
+					}
+					
 					//add element back to service step
 					//clone journey and add this step at the end
 					List<Step> steps = new ArrayList<>(journey.getSteps());
-					//Step new_step = step_service.save(step);
-					//step.setId(new_step.getId());
+					Step step_record = new SimpleStep(null, null, action, "", null);
+					step_record.setKey(step.generateKey());
+					step_record = step_service.save(step_record);
+					
+					step_service.setStartPage(step_record.getId(), journey_result_page.getId());
+					step_service.setElementState(step.getId(), leaf_element.getId());
+					
+					step.setId(step_record.getId());
 					steps.add(step);
 
 					DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
@@ -222,6 +232,7 @@ public class AuditController {
 						audit_record_service.addDomainMap(journey_msg.getDomainAuditRecordId(), domain_map.getId());
 					}
 					
+					//CREATE NEW JOURNEY
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
 					Journey journey_record = journey_service.findByCandidateKey(journey_msg.getDomainAuditRecordId(), journey.getCandidateKey());
 					log.warn("journey record candidate key = "+expanded_journey.getCandidateKey());
@@ -232,18 +243,20 @@ public class AuditController {
 						
 						journey_record = journey_service.save(expanded_journey);
 						expanded_journey.setId(journey_record.getId());
-						//add journey to domain map
+						
+						steps.stream().map(temp_step -> journey_service.addStep(journey.getId(), temp_step.getId()));
 
 						log.warn("adding journey to domain map");
-						domain_map_service.addJourneyToDomainMap(expanded_journey.getId(), domain_map.getId());
-						
 					}
 					else {
 						log.warn("journey record found");
+						//ADD EACH STEP TO JOURNEY AND RECALCULATE ORDERED STEPS
 						journey_record.setSteps(expanded_journey.getSteps());
 						expanded_journey = journey_record;
 					}
-					
+					//add journey to domain map
+					domain_map_service.addJourneyToDomainMap(expanded_journey.getId(), domain_map.getId());
+
 					//add journey to list of elements to explore for click or typing interactions
 					JourneyCandidateMessage candidate = new JourneyCandidateMessage(expanded_journey, 
 																					BrowserType.CHROME,
@@ -278,7 +291,26 @@ public class AuditController {
 	}
 
 	
-
+	/**
+	 * if last step in journey is a {@link LandingStep} or a {@link SimpleStep} results in a change of state, 
+	 * 	then return true.
+	 * 
+	 * @param journey
+	 * @return
+	 */
+	private boolean shouldBeExpanded(Journey journey) {
+		Step last_step = journey.getSteps().get(journey.getSteps().size()-1);
+		if(last_step instanceof LandingStep) {
+			return true;
+		}
+		else if(last_step instanceof SimpleStep) {
+			if(!last_step.getStartPage().getKey().contentEquals(last_step.getEndPage().getKey())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Checks if {@link Step} exists within the given {@link Journey}
 	 * 
@@ -293,8 +325,20 @@ public class AuditController {
 				continue;
 			}
 			
-			if(journey_step.getKey().contentEquals(step.getKey())) {
-				return true;
+			if(step instanceof LandingStep && journey_step instanceof LandingStep) {
+				if(step.getStartPage().getKey().contentEquals(journey_step.getStartPage().getKey())) {
+					return true;
+				}
+			}
+			else if( step instanceof SimpleStep && journey_step instanceof SimpleStep) {
+				SimpleStep temp1 = (SimpleStep)step;
+				SimpleStep temp2 = (SimpleStep)journey_step;
+				if(temp1.getStartPage().getKey().contentEquals(journey_step.getStartPage().getKey())
+						&& temp1.getElementState().getKey().contentEquals(temp2.getElementState().getKey())
+						&& temp1.getAction().equals(temp2.getAction())
+						&& temp1.getActionInput().contentEquals(temp2.getActionInput())) {
+					return true;
+				}
 			}
 		}
 		return false;
