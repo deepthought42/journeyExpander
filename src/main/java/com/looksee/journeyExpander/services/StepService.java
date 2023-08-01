@@ -70,6 +70,7 @@ public class StepService {
 			new_simple_step.setActionInput(simple_step.getActionInput());
 			new_simple_step.setKey(simple_step.generateKey());
 			new_simple_step = simple_step_repo.save(new_simple_step);
+			
 			//new_simple_step.setStartPage(simple_step_repo.addStartPage(new_simple_step.getId(), simple_step.getStartPage().getId()));
 			new_simple_step.setStartPage(simple_step.getStartPage());
 			//new_simple_step.setEndPage(simple_step_repo.addEndPage(new_simple_step.getId(), simple_step.getEndPage().getId()));
@@ -177,5 +178,21 @@ public class StepService {
 
 	public PageState getEndPage(long id) {
 		return page_state_repo.getEndPageForStep(id);
+	}
+	
+	public void setElementState(long step_id, long element_id) {
+		step_repo.setElementState(step_id, element_id);
+	}
+
+	public void addEndPage(long step_id, long page_id) {
+		step_repo.addEndPage(step_id, page_id);
+	}
+
+	public Step updateKey(long step_id, String key) {
+		return step_repo.updateKey(step_id, key);
+	}
+
+	public void setStartPage(Long step_id, Long page_id) {
+		step_repo.setStartPage(step_id, page_id);		
 	}
 }

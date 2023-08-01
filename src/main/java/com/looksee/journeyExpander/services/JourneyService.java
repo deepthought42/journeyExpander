@@ -1,5 +1,6 @@
 package com.looksee.journeyExpander.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.looksee.journeyExpander.models.enums.JourneyStatus;
 import com.looksee.journeyExpander.models.journeys.Journey;
 import com.looksee.journeyExpander.models.journeys.Step;
 import com.looksee.journeyExpander.models.repository.JourneyRepository;
@@ -46,6 +48,18 @@ public class JourneyService {
 
 	public Journey findByCandidateKey(long domain_audit_id, String candidateKey) {
 		return journey_repo.findByCandidateKey(domain_audit_id, candidateKey);
+	}
+	
+	public Journey updateFields(long journey_id, JourneyStatus status, String key, List<Long> ordered_ids) {
+		return journey_repo.updateFields(journey_id, status, key, ordered_ids);
+	}
+
+	public Journey addStep(long journey_id, long step_id) {
+		return journey_repo.addStep(journey_id, step_id);
+	}
+
+	public Journey findByCandidateKey(long domain_map_id, String candidate_key) {
+		return journey_repo.findByCandidateKey(domain_map_id, candidate_key);
 	}
 	
 }
