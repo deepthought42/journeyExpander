@@ -112,8 +112,6 @@ public class AuditController {
 	    
 	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey_msg);
 
-		//List<Journey> hover_interactions = new ArrayList<>();
-		//List<Journey> click_interactions = new ArrayList<>();
 		List<String> interactive_elements = new ArrayList<>();
 		List<Step> journey_steps = journey.getSteps();
 		log.warn("journey steps : "+journey_steps);
@@ -160,8 +158,6 @@ public class AuditController {
 			
 			//get all leaf elements 
 			log.warn("getting visible leaf elements for page with id = "+journey_result_page.getId());
-			//List<ElementState> leaf_elements = element_state_service.getVisibleLeafElements(journey_result_page.getId());
-			//List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
 
 			log.warn(leaf_elements.size()+" leaf elements found");
 			
@@ -192,7 +188,7 @@ public class AuditController {
 				//check if page state is same as original page state. If not then add new ElementInteractionStep 
 				
 				for(Action action: actions) {
-					SimpleStep step = new SimpleStep(journey_result_page, 
+					Step step = new SimpleStep(journey_result_page, 
 												 	leaf_element, 
 												 	action, 
 												 	"", 
@@ -210,17 +206,23 @@ public class AuditController {
 						continue;
 					}
 					
+					log.warn("building new step");
 					//add element back to service step
 					//clone journey and add this step at the end
 					List<Step> steps = new ArrayList<>(journey.getSteps());
-					Step step_record = new SimpleStep(null, null, action, "", null);
-					step_record.setKey(step.generateKey());
-					step_record = step_service.save(step_record);
+					//Step step_record = new SimpleStep(null, null, action, "", null);
+					step.setKey(step.generateKey());
+					log.warn("saving step to DB");
+					step = step_service.save(step);
 					
-					step_service.setStartPage(step_record.getId(), journey_result_page.getId());
-					step_service.setElementState(step.getId(), leaf_element.getId());
-					
+					/*
 					step.setId(step_record.getId());
+
+					log.warn("Step saved. adding start page to step");
+					step_service.setStartPage(step_record.getId(), journey_result_page.getId());
+					log.warn("adding element state to step");
+					step_service.setElementState(step_record.getId(), leaf_element.getId());
+					*/
 					steps.add(step);
 
 					DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
@@ -234,7 +236,7 @@ public class AuditController {
 					
 					//CREATE NEW JOURNEY
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
-					Journey journey_record = journey_service.findByCandidateKey(journey_msg.getDomainAuditRecordId(), journey.getCandidateKey());
+					Journey journey_record = journey_service.findByCandidateKey(domain_map.getId(), journey.getCandidateKey());
 					log.warn("journey record candidate key = "+expanded_journey.getCandidateKey());
 					log.warn("journey is null = " + (journey_record == null));
 					
@@ -279,7 +281,7 @@ public class AuditController {
 		}
 		catch(Exception e) {
 			log.warn("Exception occurred while expanding journey ::   "+e.getMessage());
-			//e.printStackTrace();
+			e.printStackTrace();
 			
 			JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 			String journey_json = mapper.writeValueAsString(journey);

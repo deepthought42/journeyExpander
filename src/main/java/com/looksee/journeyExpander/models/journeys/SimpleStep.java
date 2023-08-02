@@ -25,6 +25,7 @@ import com.looksee.journeyExpander.models.PageState;
 @JsonTypeName("SIMPLE")
 @Node
 public class SimpleStep extends Step  {
+	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(SimpleStep.class);
 	
 	

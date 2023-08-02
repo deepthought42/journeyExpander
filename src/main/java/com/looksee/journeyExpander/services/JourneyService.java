@@ -45,10 +45,6 @@ public class JourneyService {
 		
 		return journey_record;
 	}
-
-	public Journey findByCandidateKey(long domain_audit_id, String candidateKey) {
-		return journey_repo.findByCandidateKey(domain_audit_id, candidateKey);
-	}
 	
 	public Journey updateFields(long journey_id, JourneyStatus status, String key, List<Long> ordered_ids) {
 		return journey_repo.updateFields(journey_id, status, key, ordered_ids);

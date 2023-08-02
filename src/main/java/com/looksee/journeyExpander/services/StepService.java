@@ -71,12 +71,19 @@ public class StepService {
 			new_simple_step.setKey(simple_step.generateKey());
 			new_simple_step = simple_step_repo.save(new_simple_step);
 			
-			//new_simple_step.setStartPage(simple_step_repo.addStartPage(new_simple_step.getId(), simple_step.getStartPage().getId()));
-			new_simple_step.setStartPage(simple_step.getStartPage());
-			//new_simple_step.setEndPage(simple_step_repo.addEndPage(new_simple_step.getId(), simple_step.getEndPage().getId()));
-			new_simple_step.setEndPage(simple_step.getEndPage());
-			//new_simple_step.setElementState(simple_step_repo.addElementState(new_simple_step.getId(), simple_step.getElementState().getId()));
+			log.warn("new simple step id = "+new_simple_step.getId());
+			log.warn("Start page ID = "+simple_step.getStartPage().getId());
+			simple_step_repo.addStartPage(new_simple_step.getId(), simple_step.getStartPage().getId());
+			new_simple_step.setStartPage( simple_step.getStartPage());
+			//new_simple_step.setStartPage(simple_step.getStartPage());
+			if(simple_step.getEndPage() != null) {
+				simple_step_repo.addEndPage(new_simple_step.getId(), simple_step.getEndPage().getId());
+				new_simple_step.setEndPage(simple_step.getEndPage());
+			}
+			//new_simple_step.setEndPage(simple_step.getEndPage());
+			simple_step_repo.addElementState(new_simple_step.getId(), simple_step.getElementState().getId());
 			new_simple_step.setElementState(simple_step.getElementState());
+			//new_simple_step.setElementState(simple_step.getElementState());
 			
 			return new_simple_step;
 		}
@@ -134,7 +141,7 @@ public class StepService {
 				LandingStep landing_step = (LandingStep)step;
 				
 				Step saved_step = landing_step_repo.save(landing_step);
-				//page_state_repo.addStartPage(saved_step.getId(), landing_step.getStartPage().getId());
+				page_state_repo.addStartPage(saved_step.getId(), landing_step.getStartPage().getId());
 				saved_step.setStartPage(landing_step.getStartPage());
 				
 				return saved_step;
