@@ -236,7 +236,7 @@ public class AuditController {
 					
 					//CREATE NEW JOURNEY
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
-					Journey journey_record = journey_service.findByCandidateKey(domain_map.getId(), journey.getCandidateKey());
+					Journey journey_record = journey_service.findByCandidateKey(domain_map.getId(), expanded_journey.getCandidateKey());
 					log.warn("journey record candidate key = "+expanded_journey.getCandidateKey());
 					log.warn("journey is null = " + (journey_record == null));
 					
@@ -245,8 +245,8 @@ public class AuditController {
 						
 						journey_record = journey_service.save(expanded_journey);
 						expanded_journey.setId(journey_record.getId());
-						
-						steps.stream().map(temp_step -> journey_service.addStep(journey.getId(), temp_step.getId()));
+						long journey_id = journey_record.getId();
+						steps.stream().map(temp_step -> journey_service.addStep(journey_id, temp_step.getId()));
 
 						log.warn("adding journey to domain map");
 					}
