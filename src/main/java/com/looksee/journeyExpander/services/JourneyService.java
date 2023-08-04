@@ -21,6 +21,8 @@ public class JourneyService {
 	@Autowired
 	private JourneyRepository journey_repo;
 	
+	@Autowired
+	private StepService step_service;
 	public Optional<Journey> findById(long id) {
 		return journey_repo.findById(id);
 	}
@@ -38,6 +40,12 @@ public class JourneyService {
 		journey_record = journey_repo.save(journey_record);
 		
 		for(Step step: journey.getSteps()) {
+			log.warn("saving step = "+step.getId());
+			log.warn("for journey = "+journey.getId());
+			if(step.getId() == null) {
+				Step temp_step = step_service.save(step);
+				step.setId(temp_step.getId());
+			}
 			journey_repo.addStep(journey.getId(), step.getId());
 		}
 		
