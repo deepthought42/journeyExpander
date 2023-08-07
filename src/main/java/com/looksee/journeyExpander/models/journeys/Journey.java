@@ -110,7 +110,7 @@ public class Journey extends LookseeObject {
 		setOrderedIds(ordered_ids);
 	}
 
-	public boolean addStep(SimpleStep step) {
+	public boolean addStep(Step step) {
 		return this.steps.add(step);
 	}
 	

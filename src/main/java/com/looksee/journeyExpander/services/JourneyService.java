@@ -41,16 +41,15 @@ public class JourneyService {
 		
 		for(Step step: journey.getSteps()) {
 			log.warn("saving step = "+step.getId());
-			log.warn("for journey = "+journey.getId());
+			log.warn("for journey = "+journey_record.getId());
 			if(step.getId() == null) {
 				Step temp_step = step_service.save(step);
 				step.setId(temp_step.getId());
 			}
-			journey_repo.addStep(journey.getId(), step.getId());
+			journey_repo.addStep(journey_record.getId(), step.getId());
+			journey_record.addStep(step);
 		}
-		
-		journey_record.setSteps(journey.getSteps());
-		
+				
 		return journey_record;
 	}
 	
