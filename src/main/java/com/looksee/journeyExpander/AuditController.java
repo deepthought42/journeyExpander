@@ -174,11 +174,14 @@ public class AuditController {
 											.collect(Collectors.toList());
 
 			log.warn(leaf_elements.size()+" leaf elements after round 1 filtering");
-			leaf_elements = leaf_elements.parallelStream().filter(element -> element.getXLocation() >= 0 && element.getYLocation() >= 0)
-															.collect(Collectors.toList());
+			leaf_elements = leaf_elements.parallelStream()
+											.filter(element -> element.getXLocation() >= 0 && element.getYLocation() >= 0)
+											.collect(Collectors.toList());
 			log.warn(leaf_elements.size()+" leaf elements after round 2 filtering");
 			
-			leaf_elements = leaf_elements.parallelStream().filter(element -> !ElementStateUtils.isFormElement(element))
+			leaf_elements = leaf_elements.parallelStream()
+											.filter(element -> !ElementStateUtils.isFormElement(element))
+											.filter(element -> ElementStateUtils.isInteractiveElement(element))
 											.collect(Collectors.toList());
 			
 			log.warn(leaf_elements.size()+" leaf elements after filtering");
