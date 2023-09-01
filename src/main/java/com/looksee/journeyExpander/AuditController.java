@@ -111,7 +111,6 @@ public class AuditController {
 	    Journey journey = journey_msg.getJourney();
 	    
 	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey_msg);
-
 		List<String> interactive_elements = new ArrayList<>();
 		List<Step> journey_steps = journey.getSteps();
 		log.warn("journey steps : "+journey_steps);
@@ -140,14 +139,21 @@ public class AuditController {
 				//create and save journey
 				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK); 
 			}
-			log.warn("(before load) start page element count = "+journey_result_page.getElements());
-
 			List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
 			journey_result_page.setElements(leaf_elements);
 			
-			log.warn("(after load) start page element count = "+journey_result_page.getElements());
+			log.warn("(after load) start page element count = "+journey_result_page.getElements().size());
 
 			//if the page has already been expanded then don't expand the journey for this page
+			DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
+			log.warn("Domain map = "+domain_map);
+			
+			List<Step> page_steps = step_service.getStepsWithStartPage(journey_result_page, domain_map.getId());
+			if(page_steps.size() > 1) {
+				log.warn("RETURNING WITHOUT EXPNASION!!!!  Steps were found that start with page with key = "+journey_result_page.getKey());
+				return new ResponseEntity<String>("RETURNING WITHOUT EXPNASION!!!!  Steps were found that start with page with key"+journey_result_page.getKey(), HttpStatus.OK);
+			}
+			
 		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 			
 		    log.warn("expanding journey using page state leaf elements");
@@ -228,8 +234,7 @@ public class AuditController {
 					*/
 					steps.add(step);
 
-					DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
-					log.warn("Domain map = "+domain_map);
+					
 					
 					if(domain_map == null) {
 						domain_map = domain_map_service.save(new DomainMap());
