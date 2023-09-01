@@ -177,12 +177,23 @@ public class StepService {
 	 * Checks if page state is listed as a the start page for a journey step
 	 * 
 	 * @param page_state
+	 * @param domain_map_id TODO
 	 * @return
+	 * 
+	 * @pre page_state != null
+	 * @pre page_state.getId() != null
 	 */
-	public List<Step> getStepsWithStartPage(PageState page_state) {
-		return step_repo.getStepsWithStartPage(page_state.getId());
+	public List<Step> getStepsWithStartPage(PageState page_state, long domain_map_id) {
+		assert page_state != null;
+		assert page_state.getId() != null;
+				
+		return step_repo.getStepsWithStartPage(domain_map_id, page_state.getId());
 	}
 
+	public List<Step> getStepsWithStartPage(long domainAuditRecordId, PageState page_state) {
+		return step_repo.getStepsWithStartPage(domainAuditRecordId, page_state.getKey());
+	}
+	
 	public PageState getEndPage(long id) {
 		return page_state_repo.getEndPageForStep(id);
 	}
