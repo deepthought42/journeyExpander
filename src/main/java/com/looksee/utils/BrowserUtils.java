@@ -183,12 +183,15 @@ public class BrowserUtils {
 		boolean is_same_domain = false;
 		
 		boolean contains_domain = url_without_protocol.contains(domain_host);
-		boolean is_url_longer = url_without_protocol.length() > domain_host.length();
-		boolean url_contains_long_host = url.contains(domain_host+"/");
-		if( contains_domain && ((is_url_longer && url_contains_long_host) || !is_url_longer) ) {
+		//boolean is_url_longer = url_without_protocol.length() > domain_host.length();
+		//boolean url_contains_long_host = url.contains(domain_host+"/");
+		if( contains_domain ) {
 			is_same_domain = true;
 		}
+		
 		boolean is_relative = isRelativeLink(domain_host, url);
+		
+		log.warn("current url = "+url+ ";  domain host = "+domain_host + "; IS INTERNAL?? = "+is_same_domain+";  IS RELATIVE ?? = "+is_relative);
 		return (!is_same_domain && !is_relative ) || url.contains("////");
 	}
 	

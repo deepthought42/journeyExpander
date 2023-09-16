@@ -117,12 +117,10 @@ public class AuditController {
 		try {
 			//get last step
 			Step last_step = journey_steps.get(journey_steps.size()-1);
-			//boolean page_load_step = false;
 			PageState journey_result_page = null;
 			
 			if(last_step instanceof LandingStep) {
 				//get start page as journey result page
-				//page_load_step = true;
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getStartPage();
 				log.warn("LANDING STEP with element count "+journey_result_page.getElements());
 			}
@@ -139,8 +137,6 @@ public class AuditController {
 				//create and save journey
 				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK); 
 			}
-			List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
-			journey_result_page.setElements(leaf_elements);
 			
 			log.warn("(after load) start page element count = "+journey_result_page.getElements().size());
 
@@ -165,6 +161,8 @@ public class AuditController {
 			//get all leaf elements 
 			log.warn("getting visible leaf elements for page with id = "+journey_result_page.getId());
 
+			List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
+			journey_result_page.setElements(leaf_elements);
 			log.warn(leaf_elements.size()+" leaf elements found");
 			
 			//Filter out non interactive elements
