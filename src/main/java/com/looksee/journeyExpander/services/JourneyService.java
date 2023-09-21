@@ -32,7 +32,6 @@ public class JourneyService {
 	}
 	
 	public Journey save(Journey journey) {
-		log.warn("retrieving journey record with key = "+journey.getKey());
 		Journey journey_record = new Journey();
 		journey_record.setKey(journey.getKey());
 		journey_record.setOrderedIds(journey.getOrderedIds());
@@ -40,8 +39,6 @@ public class JourneyService {
 		journey_record = journey_repo.save(journey_record);
 		
 		for(Step step: journey.getSteps()) {
-			log.warn("saving step = "+step.getId());
-			log.warn("for journey = "+journey_record.getId());
 			if(step.getId() == null) {
 				Step temp_step = step_service.save(step);
 				step.setId(temp_step.getId());
