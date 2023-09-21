@@ -122,12 +122,12 @@ public class AuditController {
 			if(last_step instanceof LandingStep) {
 				//get start page as journey result page
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getStartPage();
-				log.warn("LANDING STEP with element count "+journey_result_page.getElements());
+				log.warn("LANDING STEP with ID = "+journey_result_page.getId());
 			}
 			else {
 				//get end page as journey result page
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
-				log.warn("SIMPLE STEP with element count "+journey_result_page.getElements());
+				log.warn("SIMPLE STEP with ID = "+journey_result_page.getId());
 			}
 			
 			//if start page is external then don't expand
@@ -138,11 +138,8 @@ public class AuditController {
 				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK); 
 			}
 			
-			log.warn("(after load) start page element count = "+journey_result_page.getElements().size());
-
 			//if the page has already been expanded then don't expand the journey for this page
 			DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
-			log.warn("Domain map = "+domain_map);
 			
 			List<Step> page_steps = step_service.getStepsWithStartPage(journey_result_page, domain_map.getId());
 			if(page_steps.size() > 1) {
@@ -152,18 +149,15 @@ public class AuditController {
 			
 		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 			
-		    log.warn("expanding journey using page state leaf elements");
 			// EXPAND JOURNEY
 			List<Action> actions = new ArrayList<>();
 			actions.add(Action.CLICK);
 			//actions.add(Action.MOUSE_OVER);
 			
-			//get all leaf elements 
-			log.warn("getting visible leaf elements for page with id = "+journey_result_page.getId());
-
+			//get all elements then filter for interactive elements
 			List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
 			journey_result_page.setElements(leaf_elements);
-			log.warn(leaf_elements.size()+" leaf elements found");
+			log.warn(leaf_elements.size()+" interactive elements found");
 			
 			//Filter out non interactive elements
 			//Filter out elements that are in explored map for PageState with key
@@ -177,11 +171,11 @@ public class AuditController {
 											})
 											.collect(Collectors.toList());
 
-			log.warn(leaf_elements.size()+" leaf elements after round 1 filtering");
+			//log.warn(leaf_elements.size()+" leaf elements after round 1 filtering");
 			leaf_elements = leaf_elements.parallelStream()
 											.filter(element -> element.getXLocation() >= 0 && element.getYLocation() >= 0)
 											.collect(Collectors.toList());
-			log.warn(leaf_elements.size()+" leaf elements after round 2 filtering");
+			//log.warn(leaf_elements.size()+" leaf elements after round 2 filtering");
 			
 			leaf_elements = leaf_elements.parallelStream()
 											.filter(element -> !ElementStateUtils.isFormElement(element))
@@ -198,47 +192,38 @@ public class AuditController {
 					Step step = new SimpleStep(journey_result_page, 
 												 	leaf_element, 
 												 	action, 
-												 	"", 
-												 	null);
-					
-					log.warn("start page element count = "+journey_result_page.getElements());
+												 	"",
+												 	null,
+												 	JourneyStatus.CANDIDATE);
 					
 					if(existsInJourney(journey, step)) {
-						log.warn("step already exists within journey");
+						log.warn("IGNRONING JOURNEY! step already exists within journey");
 						continue;
 					}
 
 					if(!shouldBeExpanded(journey)) {
-						log.warn("journey should not be expanded");
+						log.warn("IGNORING JOURNEY! journey should not be expanded");
 						continue;
-					}
-					
-					log.warn("building new step");
-					//add element back to service step
-					//clone journey and add this step at the end
-					List<Step> steps = new ArrayList<>(journey.getSteps());
-					//Step step_record = new SimpleStep(null, null, action, "", null);
-					step.setKey(step.generateKey());
-					log.warn("saving step to DB");
-					step = step_service.save(step);
-					
-					/*
-					step.setId(step_record.getId());
-
-					log.warn("Step saved. adding start page to step");
-					step_service.setStartPage(step_record.getId(), journey_result_page.getId());
-					log.warn("adding element state to step");
-					step_service.setElementState(step_record.getId(), leaf_element.getId());
-					*/
-					steps.add(step);
-
-					
+					}		
 					
 					if(domain_map == null) {
 						domain_map = domain_map_service.save(new DomainMap());
 						log.warn("adding domain map to audit record = " + journey_msg.getDomainAuditRecordId());
 						audit_record_service.addDomainMap(journey_msg.getDomainAuditRecordId(), domain_map.getId());
 					}
+					
+					//if step with candidate key exists for domain map then don't expand
+					Step step_record = step_service.findByCandidateKey(step.getCandidateKey(), domain_map.getId());
+					if(step_record != null) {
+						log.warn("IGNORING STEP!!  Step with candidate key already exists!!");
+						continue;
+					}
+					
+					//add element back to service step
+					//clone journey and add this step at the end
+					step = step_service.save(step);
+					List<Step> steps = new ArrayList<>(journey.getSteps());
+					steps.add(step);
 					
 					//CREATE NEW JOURNEY
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);

@@ -14,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.looksee.journeyExpander.models.enums.JourneyStatus;
+import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageState;
 
@@ -28,7 +30,6 @@ public class SimpleStep extends Step  {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(SimpleStep.class);
 	
-	
 	@Relationship(type = "HAS", direction = Direction.OUTGOING)
 	private ElementState element;
 	
@@ -39,21 +40,34 @@ public class SimpleStep extends Step  {
 		super();
 		setActionInput("");
 		setAction(Action.UNKNOWN);
+		setStatus(JourneyStatus.CANDIDATE);
+	}
+	
+	@Deprecated
+	public SimpleStep(Action action, String input_string) {
+		super();
+		setActionInput(input_string);
+		setAction(action);
 	}
 	
     @JsonCreator
 	public SimpleStep(@JsonProperty("startPage") PageState start_page,
-			@JsonProperty("element") ElementState element,
-			@JsonProperty("action") Action action,
-			@JsonProperty("actionInput") String action_input, 
-			@JsonProperty("endPage") PageState end_page) 
+						@JsonProperty("elementState") ElementState element,
+						@JsonProperty("action") Action action,
+						@JsonProperty("actionInput") String action_input, 
+						@JsonProperty("endPage") PageState end_page, 
+						@JsonProperty("status") JourneyStatus status) 
 	{
 		setStartPage(start_page);
 		setElementState(element);
 		setAction(action);
 		setActionInput(action_input);
 		setEndPage(end_page);
+		setStatus(status);
 		setKey(generateKey());
+		if(JourneyStatus.CANDIDATE.equals(status)) {
+			setCandidateKey(generateCandidateKey());
+		}
 	}
 	
 	public Step clone() {
@@ -61,7 +75,8 @@ public class SimpleStep extends Step  {
 							  getElementState(), 
 							  getAction(), 
 							  getActionInput(), 
-							  getEndPage());
+							  getEndPage(),
+							  getStatus());
 	}
 	
 	public ElementState getElementState() {
@@ -86,16 +101,22 @@ public class SimpleStep extends Step  {
 		if(getStartPage() != null) {
 			key += getStartPage().getId();
 		}
-		if(getElementState() != null) {
-			key += getElementState().getId();
+		
+		if(element != null) {
+			key += element.getId();
 		}
+		
 		if(getEndPage() != null) {
 			key += getEndPage().getId();
 		}
-		//log.warn("Step to perform "+action+" on element "+element.getId()+ " -- "+element.getName());
+
 		return "simplestep"+key+action+actionInput;
 	}
 
+	@Override
+	public String generateCandidateKey() {
+		return generateKey();
+	}
 	
 	@Override
 	public String toString() {

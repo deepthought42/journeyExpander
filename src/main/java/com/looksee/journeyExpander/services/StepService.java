@@ -49,6 +49,14 @@ public class StepService {
 		return step_repo.findByKey(step_key);
 	}
 
+	/**
+	 * Saves a {@link Step} to the database
+	 * @Version - 9/19/2023
+	 * 
+	 * @param step
+	 * 
+	 * @return saved database record for {@link Step}
+	 */
 	public Step save(Step step) {
 		assert step != null;
 		
@@ -64,26 +72,23 @@ public class StepService {
 				return step_record;
 			}
 			
-			
 			SimpleStep new_simple_step = new SimpleStep();
 			new_simple_step.setAction(simple_step.getAction());
 			new_simple_step.setActionInput(simple_step.getActionInput());
+			new_simple_step.setStatus(simple_step.getStatus());
+			new_simple_step.setCandidateKey(simple_step.getCandidateKey());
 			new_simple_step.setKey(simple_step.generateKey());
 			new_simple_step = simple_step_repo.save(new_simple_step);
+			setStartPage(new_simple_step.getId(), simple_step.getStartPage().getId());
+			new_simple_step.setStartPage(simple_step.getStartPage());
 			
-			log.warn("new simple step id = "+new_simple_step.getId());
-			log.warn("Start page ID = "+simple_step.getStartPage().getId());
-			simple_step_repo.addStartPage(new_simple_step.getId(), simple_step.getStartPage().getId());
-			new_simple_step.setStartPage( simple_step.getStartPage());
-			//new_simple_step.setStartPage(simple_step.getStartPage());
 			if(simple_step.getEndPage() != null) {
-				simple_step_repo.addEndPage(new_simple_step.getId(), simple_step.getEndPage().getId());
+				addEndPage(new_simple_step.getId(), simple_step.getEndPage().getId());
 				new_simple_step.setEndPage(simple_step.getEndPage());
 			}
-			//new_simple_step.setEndPage(simple_step.getEndPage());
-			simple_step_repo.addElementState(new_simple_step.getId(), simple_step.getElementState().getId());
+			
+			setElementState(new_simple_step.getId(), simple_step.getElementState().getId());
 			new_simple_step.setElementState(simple_step.getElementState());
-			//new_simple_step.setElementState(simple_step.getElementState());
 			
 			return new_simple_step;
 		}
@@ -107,12 +112,17 @@ public class StepService {
 			
 			LoginStep new_login_step = new LoginStep();
 			new_login_step.setKey(login_step.generateKey());
-			log.warn("saving login step");
+			new_login_step.setCandidateKey(login_step.getCandidateKey());
+			new_login_step.setStatus(login_step.getStatus());
+			log.warn("saving LOGIN step");
 			new_login_step = login_step_repo.save(new_login_step);
+			
 			log.warn("adding start page to login step");
+			setStartPage(new_login_step.getId(), login_step.getStartPage().getId());
 			new_login_step.setStartPage(login_step.getStartPage());
 			
 			log.warn("setting end page");
+			addEndPage(new_login_step.getId(), login_step.getEndPage().getId());
 			new_login_step.setEndPage(login_step.getEndPage());
 			
 			log.warn("adding username element to login step");
@@ -139,9 +149,12 @@ public class StepService {
 			}
 			else {
 				LandingStep landing_step = (LandingStep)step;
+				landing_step.setStatus(step.getStatus());
+				landing_step.setKey(step.getKey());
+				landing_step.setCandidateKey(step.getCandidateKey());
 				
 				Step saved_step = landing_step_repo.save(landing_step);
-				page_state_repo.addStartPage(saved_step.getId(), landing_step.getStartPage().getId());
+				setStartPage(saved_step.getId(), landing_step.getStartPage().getId());
 				saved_step.setStartPage(landing_step.getStartPage());
 				
 				return saved_step;
@@ -212,5 +225,16 @@ public class StepService {
 
 	public void setStartPage(Long step_id, Long page_id) {
 		step_repo.setStartPage(step_id, page_id);		
+	}
+
+	/**
+	 * Retrieve single step with given candidate key
+	 * @param domain_map_id TODO
+	 * @param candidateKey
+	 * 
+	 * @return
+	 */
+	public Step findByCandidateKey(String candidate_key, long domain_map_id) {
+		return step_repo.findByCandidateKey(candidate_key, domain_map_id);
 	}
 }
