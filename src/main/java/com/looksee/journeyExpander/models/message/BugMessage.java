@@ -2,8 +2,8 @@ package com.looksee.journeyExpander.models.message;
 
 import java.util.Date;
 
-import com.looksee.journeyExpander.models.LookseeObject;
 import com.looksee.journeyExpander.models.enums.BugType;
+import com.looksee.journeyExpander.models.LookseeObject;
 
 
 /**

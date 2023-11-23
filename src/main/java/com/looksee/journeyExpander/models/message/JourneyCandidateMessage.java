@@ -8,7 +8,7 @@ import com.looksee.journeyExpander.models.journeys.Journey;
 /**
  * 
  */
-public class JourneyCandidateMessage extends Message {
+public class JourneyCandidateMessage extends DomainAuditMessage {
 
 	private long map_id;
 	private Journey journey;
@@ -18,12 +18,11 @@ public class JourneyCandidateMessage extends Message {
 	
 	public JourneyCandidateMessage(Journey journey, 
 								   BrowserType browser_type, 
-								   long domain_id, 
 								   long account_id, 
-								   long audit_record_id,
+								   long audit_record_id, 
 								   long map_id)
 	{
-		super(account_id, audit_record_id, domain_id);
+		super(account_id, audit_record_id);
 		setJourney(journey);
 		//setSteps(steps);
 		setBrowser(browser_type);
@@ -31,11 +30,10 @@ public class JourneyCandidateMessage extends Message {
 	}
 
 	public JourneyCandidateMessage clone(){
-		return new JourneyCandidateMessage(null, 
+		return new JourneyCandidateMessage(getJourney(), 
 								  getBrowser(), 
-								  getDomainId(),
-								  getAccountId(), 
-								  getDomainAuditRecordId(),
+								  getAccountId(),
+								  getDomainAuditRecordId(), 
 								  getMapId());
 	}
 

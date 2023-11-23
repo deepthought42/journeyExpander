@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.looksee.journeyExpander.models.enums.JourneyStatus;
 import com.looksee.journeyExpander.models.journeys.Journey;
-import com.looksee.journeyExpander.models.journeys.Step;
 import com.looksee.journeyExpander.models.repository.JourneyRepository;
 
 @Service
@@ -21,8 +20,6 @@ public class JourneyService {
 	@Autowired
 	private JourneyRepository journey_repo;
 	
-	@Autowired
-	private StepService step_service;
 	public Optional<Journey> findById(long id) {
 		return journey_repo.findById(id);
 	}
@@ -31,22 +28,36 @@ public class JourneyService {
 		return journey_repo.findByKey(key);
 	}
 	
-	public Journey save(Journey journey) {
-		Journey journey_record = new Journey();
-		journey_record.setKey(journey.getKey());
-		journey_record.setOrderedIds(journey.getOrderedIds());
-		journey_record.setStatus(journey.getStatus());
-		journey_record = journey_repo.save(journey_record);
-		
-		for(Step step: journey.getSteps()) {
-			if(step.getId() == null) {
-				Step temp_step = step_service.save(step);
-				step.setId(temp_step.getId());
+	/**
+	 * 
+	 * @param journey
+	 * @return
+	 */
+	public Journey save(long domain_map_id, Journey journey) {
+		Journey journey_record = journey_repo.findByKey(domain_map_id, journey.getKey());
+		if(journey_record == null) {
+			journey_record = journey_repo.findByCandidateKey(domain_map_id, journey.getCandidateKey());
+			if(journey_record == null) {
+				journey_record = journey_repo.save(journey);
 			}
-			journey_repo.addStep(journey_record.getId(), step.getId());
-			journey_record.addStep(step);
+			/*
+			else {
+				journey_record.setKey(journey.getKey());
+				journey_record.setOrderedIds(journey.getOrderedIds());
+				journey_record.setStatus(journey.getStatus());
+				journey_repo.save(journey_record);
+			}
+			*/
 		}
-				
+		/*
+		else {
+			journey_record.setKey(journey.getKey());
+			journey_record.setOrderedIds(journey.getOrderedIds());
+			journey_record.setStatus(journey.getStatus());
+			journey_repo.save(journey_record);
+		}
+		*/
+		
 		return journey_record;
 	}
 	
