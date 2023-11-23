@@ -104,16 +104,15 @@ public class AuditController {
 		String data = message.getData();
 	    String target = !data.isEmpty() ? new String(Base64.getDecoder().decode(data)) : "";
 	    
-	    log.warn("data value :: "+target);
 	    ObjectMapper input_mapper = new ObjectMapper();
 	    VerifiedJourneyMessage journey_msg = input_mapper.readValue(target, VerifiedJourneyMessage.class);
 
 	    Journey journey = journey_msg.getJourney();
 	    
-	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey_msg);
+	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey.getId());
 		List<String> interactive_elements = new ArrayList<>();
 		List<Step> journey_steps = journey.getSteps();
-		log.warn("journey steps : "+journey_steps);
+
 		try {
 			//get last step
 			Step last_step = journey_steps.get(journey_steps.size()-1);
@@ -122,16 +121,14 @@ public class AuditController {
 			if(last_step instanceof LandingStep) {
 				//get start page as journey result page
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getStartPage();
-				log.warn("LANDING STEP with ID = "+journey_result_page.getId());
 			}
 			else {
 				//get end page as journey result page
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
-				log.warn("SIMPLE STEP with ID = "+journey_result_page.getId());
 			}
 			
 			//if start page is external then don't expand
-			Domain domain = domain_service.findById(journey_msg.getDomainId()).get();
+			Domain domain = domain_service.findByAuditRecord(journey_msg.getDomainAuditRecordId());
 			
 			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl())) {				
 				//create and save journey
@@ -182,6 +179,18 @@ public class AuditController {
 											.filter(element -> ElementStateUtils.isInteractiveElement(element))
 											.collect(Collectors.toList());
 			
+			//filter elements that were in previous page
+			String current_url = "";
+			for(int i=journey_steps.size()-1; i>=0; i--) {
+				String start_url = journey_steps.get(i).getStartPage().getUrl();
+				if(current_url.contentEquals(start_url)) {
+					break;
+				}
+				else {
+					current_url = start_url;
+				}
+			}
+			
 			log.warn(leaf_elements.size()+" leaf elements after filtering");
 
 			int journey_cnt = 0;
@@ -228,21 +237,14 @@ public class AuditController {
 					//CREATE NEW JOURNEY
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
 					Journey journey_record = journey_service.findByCandidateKey(domain_map.getId(), expanded_journey.getCandidateKey());
-					log.warn("journey record candidate key = "+expanded_journey.getCandidateKey());
-					log.warn("journey is null = " + (journey_record == null));
 					
-					if(journey_record == null) {
-						log.warn("candidate journey is set as = "+expanded_journey.getCandidateKey());
-						
-						journey_record = journey_service.save(expanded_journey);
+					if(journey_record == null) {				
+						journey_record = journey_service.save(domain_map.getId(), expanded_journey);
 						expanded_journey.setId(journey_record.getId());
 						long journey_id = journey_record.getId();
 						steps.stream().map(temp_step -> journey_service.addStep(journey_id, temp_step.getId()));
-
-						log.warn("adding journey to domain map");
 					}
 					else {
-						log.warn("journey record found");
 						//ADD EACH STEP TO JOURNEY AND RECALCULATE ORDERED STEPS
 						journey_record.setSteps(expanded_journey.getSteps());
 						expanded_journey = journey_record;
@@ -253,12 +255,11 @@ public class AuditController {
 					//add journey to list of elements to explore for click or typing interactions
 					JourneyCandidateMessage candidate = new JourneyCandidateMessage(expanded_journey, 
 																					BrowserType.CHROME,
-																					journey_msg.getDomainId(),
 																					journey_msg.getAccountId(),
 																					journey_msg.getDomainAuditRecordId(),
 																					domain_map.getId());
 					String candidate_json = mapper.writeValueAsString(candidate);
-					log.warn("journey candidate message = "+candidate_json);
+					log.warn("journey candidate message = "+expanded_journey.getId());
 					
 					journey_candidate_topic.publish(candidate_json);
 				    interactive_elements.add(leaf_element.getKey());
@@ -274,10 +275,10 @@ public class AuditController {
 			log.warn("Exception occurred while expanding journey ::   "+e.getMessage());
 			e.printStackTrace();
 			
-			JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
-			String journey_json = mapper.writeValueAsString(journey);
-			log.warn("Error while expanding journey = "+journey_json);
-		    pubSubErrorPublisherImpl.publish(journey_json);
+			log.warn("Error while expanding journey = "+journey.getId());
+			//JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+			//String journey_json = mapper.writeValueAsString(journey);
+		    //pubSubErrorPublisherImpl.publish(journey_json);
 		}
 		
 		return new ResponseEntity<String>("Error occurred while expanding journey", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -326,7 +327,7 @@ public class AuditController {
 			else if( step instanceof SimpleStep && journey_step instanceof SimpleStep) {
 				SimpleStep temp1 = (SimpleStep)step;
 				SimpleStep temp2 = (SimpleStep)journey_step;
-				if(temp1.getStartPage().getKey().contentEquals(journey_step.getStartPage().getKey())
+				if(temp1.getStartPage().getUrl().contentEquals(temp2.getStartPage().getUrl())
 						&& temp1.getElementState().getKey().contentEquals(temp2.getElementState().getKey())
 						&& temp1.getAction().equals(temp2.getAction())
 						&& temp1.getActionInput().contentEquals(temp2.getActionInput())) {

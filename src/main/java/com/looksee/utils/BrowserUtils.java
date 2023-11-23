@@ -191,7 +191,6 @@ public class BrowserUtils {
 		
 		boolean is_relative = isRelativeLink(domain_host, url);
 		
-		log.warn("current url = "+url+ ";  domain host = "+domain_host + "; IS INTERNAL?? = "+is_same_domain+";  IS RELATIVE ?? = "+is_relative);
 		return (!is_same_domain && !is_relative ) || url.contains("////");
 	}
 	
@@ -870,7 +869,7 @@ public class BrowserUtils {
 	}
 
 	public static boolean isLargerThanViewport(Dimension element_size, int viewportWidth, int viewportHeight) {
-		return element_size.getWidth() > viewportWidth || element_size.getHeight() > viewportHeight;
+		return element_size.getWidth() >= viewportWidth || element_size.getHeight() >= viewportHeight;
 	}
 
 	/**

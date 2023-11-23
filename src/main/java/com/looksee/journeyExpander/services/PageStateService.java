@@ -191,4 +191,8 @@ public class PageStateService {
 	public PageState findByDomainAudit(long domainAuditRecordId, long page_state_id) {
 		return page_state_repo.findByDomainAudit(domainAuditRecordId, page_state_id);
 	}
+
+	public List<String> getElementKeys(PageState p) {
+		return page_state_repo.getElementKeys(p.getId());
+	}
 }

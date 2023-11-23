@@ -101,7 +101,10 @@ public interface PageStateRepository extends Neo4jRepository<PageState, Long> {
 	@Query("MATCH (domain_audit:DomainAuditRecord)-[]->(page_state:PageState) WHERE id(domain_audit)=$domain_audit_id AND id(page_state)=$page_state_id RETURN page_state")
 	public PageState findByDomainAudit(@Param("domain_audit_id") long domainAuditRecordId, @Param("page_state_id") long page_state_id);
 
-	@Query("MATCH (audit_record:DomainAuditRecord) WITH audit_record WHERE id(audit_record)=$audit_record_id MATCH (audit_record)-[:FOR]->(page:PageState) WHERE page.key=$page_key RETURN page")
+	@Query("MATCH (audit_record:DomainAuditRecord) WITH audit_record WHERE id(audit_record)=$audit_record_id MATCH (audit_record)-[:HAS]->(page:PageState) WHERE page.key=$page_key RETURN page")
 	public PageState findPageWithKey(@Param("audit_record_id") long audit_record_id, @Param("page_key") String key);
+
+	@Query("MATCH (p:PageState) WITH p WHERE id(p)=$page_state_id MATCH (p)-[:HAS]->(e:ElementState) RETURN e.key")
+	public List<String> getElementKeys(Long id);
 	
 }
