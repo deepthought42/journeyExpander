@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.looksee.journeyExpander.models.journeys.LandingStep;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageState;
+import com.looksee.journeyExpander.models.journeys.LandingStep;
 import com.looksee.journeyExpander.models.journeys.LoginStep;
 import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
@@ -74,8 +74,6 @@ public class StepService {
 			SimpleStep new_simple_step = new SimpleStep();
 			new_simple_step.setAction(simple_step.getAction());
 			new_simple_step.setActionInput(simple_step.getActionInput());
-			new_simple_step.setStatus(simple_step.getStatus());
-			new_simple_step.setCandidateKey(simple_step.getCandidateKey());
 			new_simple_step.setKey(simple_step.generateKey());
 			new_simple_step = simple_step_repo.save(new_simple_step);
 			setStartPage(new_simple_step.getId(), simple_step.getStartPage().getId());
@@ -107,8 +105,6 @@ public class StepService {
 						
 			LoginStep new_login_step = new LoginStep();
 			new_login_step.setKey(login_step.generateKey());
-			new_login_step.setCandidateKey(login_step.getCandidateKey());
-			new_login_step.setStatus(login_step.getStatus());
 			new_login_step = login_step_repo.save(new_login_step);
 			
 			setStartPage(new_login_step.getId(), login_step.getStartPage().getId());
@@ -137,9 +133,7 @@ public class StepService {
 			}
 			else {
 				LandingStep landing_step = new LandingStep();
-				landing_step.setStatus(step.getStatus());
 				landing_step.setKey(step.getKey());
-				landing_step.setCandidateKey(step.getCandidateKey());
 				
 				Step saved_step = landing_step_repo.save(landing_step);
 				setStartPage(saved_step.getId(), step.getStartPage().getId());

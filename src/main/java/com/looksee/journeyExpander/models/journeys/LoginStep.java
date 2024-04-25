@@ -5,11 +5,11 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.looksee.journeyExpander.models.enums.JourneyStatus;
-import com.looksee.journeyExpander.models.journeys.LoginStep;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageState;
 import com.looksee.journeyExpander.models.TestUser;
+import com.looksee.journeyExpander.models.enums.Action;
+import com.looksee.journeyExpander.models.enums.JourneyStatus;
 import com.looksee.journeyExpander.models.enums.StepType;
 
 /**
@@ -20,7 +20,6 @@ import com.looksee.journeyExpander.models.enums.StepType;
 @JsonTypeName("LOGIN")
 @Node
 public class LoginStep extends Step{
-
 	@Relationship(type = "USES")
 	private TestUser testUser;
 	

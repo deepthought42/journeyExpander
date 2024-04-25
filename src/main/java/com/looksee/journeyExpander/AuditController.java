@@ -40,16 +40,16 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.looksee.journeyExpander.models.enums.Action;
-import com.looksee.journeyExpander.models.enums.BrowserType;
-import com.looksee.journeyExpander.models.enums.JourneyStatus;
-import com.looksee.journeyExpander.models.Domain;
-import com.looksee.journeyExpander.models.journeys.DomainMap;
 import com.looksee.journeyExpander.gcp.PubSubErrorPublisherImpl;
 import com.looksee.journeyExpander.gcp.PubSubJourneyCandidatePublisherImpl;
 import com.looksee.journeyExpander.mapper.Body;
+import com.looksee.journeyExpander.models.Domain;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageState;
+import com.looksee.journeyExpander.models.enums.Action;
+import com.looksee.journeyExpander.models.enums.BrowserType;
+import com.looksee.journeyExpander.models.enums.JourneyStatus;
+import com.looksee.journeyExpander.models.journeys.DomainMap;
 import com.looksee.journeyExpander.models.journeys.Journey;
 import com.looksee.journeyExpander.models.journeys.LandingStep;
 import com.looksee.journeyExpander.models.journeys.SimpleStep;
@@ -65,7 +65,6 @@ import com.looksee.journeyExpander.services.PageStateService;
 import com.looksee.journeyExpander.services.StepService;
 import com.looksee.utils.BrowserUtils;
 import com.looksee.utils.ElementStateUtils;
-
 
 // PubsubController consumes a Pub/Sub message.
 @RestController
@@ -127,16 +126,19 @@ public class AuditController {
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
 			}
 			
+			log.warn("Looking up domain by audit record id = "+journey_msg.getAuditRecordId());
 			//if start page is external then don't expand
-			Domain domain = domain_service.findByAuditRecord(journey_msg.getDomainAuditRecordId());
-			
-			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl())) {				
+			Domain domain = domain_service.findByAuditRecord(journey_msg.getAuditRecordId());
+			log.warn("domain = "+domain);
+			log.warn("domain id = "+domain.getId());
+			log.warn("journey_result_page.getUrl = "+journey_result_page.getUrl());
+			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl())) {
 				//create and save journey
 				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK); 
 			}
 			
 			//if the page has already been expanded then don't expand the journey for this page
-			DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getDomainAuditRecordId());
+			DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getAuditRecordId());
 			
 			List<Step> page_steps = step_service.getStepsWithStartPage(journey_result_page, domain_map.getId());
 			if(page_steps.size() > 1) {
@@ -213,16 +215,16 @@ public class AuditController {
 					if(!shouldBeExpanded(journey)) {
 						log.warn("IGNORING JOURNEY! journey should not be expanded");
 						continue;
-					}		
+					}
 					
 					if(domain_map == null) {
 						domain_map = domain_map_service.save(new DomainMap());
-						log.warn("adding domain map to audit record = " + journey_msg.getDomainAuditRecordId());
-						audit_record_service.addDomainMap(journey_msg.getDomainAuditRecordId(), domain_map.getId());
+						log.warn("adding domain map to audit record = " + journey_msg.getAuditRecordId());
+						audit_record_service.addDomainMap(journey_msg.getAuditRecordId(), domain_map.getId());
 					}
 					
 					//if step with candidate key exists for domain map then don't expand
-					Step step_record = step_service.findByCandidateKey(step.getCandidateKey(), domain_map.getId());
+					Step step_record = step_service.findByCandidateKey(step.getKey(), domain_map.getId());
 					if(step_record != null) {
 						log.warn("IGNORING STEP!!  Step with candidate key already exists!!");
 						continue;
@@ -238,7 +240,7 @@ public class AuditController {
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
 					Journey journey_record = journey_service.findByCandidateKey(domain_map.getId(), expanded_journey.getCandidateKey());
 					
-					if(journey_record == null) {				
+					if(journey_record == null) {
 						journey_record = journey_service.save(domain_map.getId(), expanded_journey);
 						expanded_journey.setId(journey_record.getId());
 						long journey_id = journey_record.getId();
@@ -256,11 +258,9 @@ public class AuditController {
 					JourneyCandidateMessage candidate = new JourneyCandidateMessage(expanded_journey, 
 																					BrowserType.CHROME,
 																					journey_msg.getAccountId(),
-																					journey_msg.getDomainAuditRecordId(),
+																					journey_msg.getAuditRecordId(),
 																					domain_map.getId());
-					String candidate_json = mapper.writeValueAsString(candidate);
-					log.warn("journey candidate message = "+expanded_journey.getId());
-					
+					String candidate_json = mapper.writeValueAsString(candidate);					
 					journey_candidate_topic.publish(candidate_json);
 				    interactive_elements.add(leaf_element.getKey());
 				    journey_cnt++;
