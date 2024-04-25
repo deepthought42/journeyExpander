@@ -4,15 +4,22 @@ package com.looksee.journeyExpander.models.message;
 import com.looksee.journeyExpander.models.enums.BrowserType;
 import com.looksee.journeyExpander.models.journeys.Journey;
 
+import lombok.Getter;
+import lombok.Setter;
+
 
 /**
  * 
  */
-public class JourneyCandidateMessage extends DomainAuditMessage {
+public class JourneyCandidateMessage extends Message {
 
 	private long map_id;
 	private Journey journey;
 	private BrowserType browser;
+
+	@Getter
+	@Setter
+	private long auditRecordId;
 	
 	public JourneyCandidateMessage() {}
 	
@@ -22,18 +29,18 @@ public class JourneyCandidateMessage extends DomainAuditMessage {
 								   long audit_record_id, 
 								   long map_id)
 	{
-		super(account_id, audit_record_id);
+		super(account_id);
 		setJourney(journey);
-		//setSteps(steps);
 		setBrowser(browser_type);
 		setMapId(map_id);
+		setAuditRecordId(audit_record_id);
 	}
 
 	public JourneyCandidateMessage clone(){
 		return new JourneyCandidateMessage(getJourney(), 
 								  getBrowser(), 
 								  getAccountId(),
-								  getDomainAuditRecordId(), 
+								  getAuditRecordId(), 
 								  getMapId());
 	}
 
