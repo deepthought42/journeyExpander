@@ -88,7 +88,7 @@ public interface DomainRepository extends Neo4jRepository<Domain, Long> {
 	@Query("MATCH (d:Domain{key:$domain_key})<-[]-(audit:AuditRecord{key:$audit_record_key}) RETURN audit")
 	public AuditRecord getAuditRecords(@Param("domain_key") String domain_key, @Param("audit_record_key") String audit_record_key);
 
-	@Query("MATCH (d:Domain)-[:HAS]->(audit_record:AuditRecord) WHERE id(audit_record)=$audit_record_id RETURN d LIMIT 1")
+	@Query("MATCH (d:Domain)-[:HAS]->(audit_record:DomainAuditRecord) WHERE id(audit_record)=$audit_record_id RETURN d LIMIT 1")
 	public Domain findByAuditRecord(@Param("audit_record_id") long audit_record_id);
 
 	@Query("MATCH (domain:Domain) RETURN domain")
