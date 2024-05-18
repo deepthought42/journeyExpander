@@ -242,25 +242,24 @@ public class AuditController {
 					
 					if(journey_record == null) {
 						journey_record = journey_service.save(domain_map.getId(), expanded_journey);
-						expanded_journey.setId(journey_record.getId());
 						long journey_id = journey_record.getId();
+						expanded_journey.setId(journey_id);
+						journey_record.setSteps(steps);
 						steps.stream().map(temp_step -> journey_service.addStep(journey_id, temp_step.getId()));
 					}
 					else {
-						//ADD EACH STEP TO JOURNEY AND RECALCULATE ORDERED STEPS
-						journey_record.setSteps(expanded_journey.getSteps());
-						expanded_journey = journey_record;
+						continue;
 					}
 					//add journey to domain map
 					domain_map_service.addJourneyToDomainMap(expanded_journey.getId(), domain_map.getId());
 
 					//add journey to list of elements to explore for click or typing interactions
-					JourneyCandidateMessage candidate = new JourneyCandidateMessage(expanded_journey, 
+					JourneyCandidateMessage candidate = new JourneyCandidateMessage(journey_record, 
 																					BrowserType.CHROME,
 																					journey_msg.getAccountId(),
 																					journey_msg.getAuditRecordId(),
 																					domain_map.getId());
-					String candidate_json = mapper.writeValueAsString(candidate);					
+					String candidate_json = mapper.writeValueAsString(candidate);
 					journey_candidate_topic.publish(candidate_json);
 				    interactive_elements.add(leaf_element.getKey());
 				    journey_cnt++;
