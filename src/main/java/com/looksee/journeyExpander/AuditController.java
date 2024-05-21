@@ -143,7 +143,7 @@ public class AuditController {
 			List<Step> page_steps = step_service.getStepsWithStartPage(journey_result_page, domain_map.getId());
 			if(page_steps.size() > 1) {
 				log.warn("RETURNING WITHOUT EXPNASION!!!!  Steps were found that start with page with key = "+journey_result_page.getKey());
-				return new ResponseEntity<String>("RETURNING WITHOUT EXPNASION!!!!  Steps were found that start with page with key"+journey_result_page.getKey(), HttpStatus.OK);
+				return new ResponseEntity<String>("RETURNING WITHOUT EXPANSION!!!!  Steps were found that start with page with key"+journey_result_page.getKey(), HttpStatus.OK);
 			}
 			
 		    JsonMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
@@ -168,15 +168,7 @@ public class AuditController {
 													Dimension dimension = new Dimension(element.getWidth(), element.getHeight()); 
 													return BrowserService.hasWidthAndHeight(dimension);
 											})
-											.collect(Collectors.toList());
-
-			//log.warn(leaf_elements.size()+" leaf elements after round 1 filtering");
-			leaf_elements = leaf_elements.parallelStream()
 											.filter(element -> element.getXLocation() >= 0 && element.getYLocation() >= 0)
-											.collect(Collectors.toList());
-			//log.warn(leaf_elements.size()+" leaf elements after round 2 filtering");
-			
-			leaf_elements = leaf_elements.parallelStream()
 											.filter(element -> !ElementStateUtils.isFormElement(element))
 											.filter(element -> ElementStateUtils.isInteractiveElement(element))
 											.collect(Collectors.toList());
@@ -240,18 +232,16 @@ public class AuditController {
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
 					Journey journey_record = journey_service.findByCandidateKey(domain_map.getId(), expanded_journey.getCandidateKey());
 					
-					if(journey_record == null) {
-						journey_record = journey_service.save(domain_map.getId(), expanded_journey);
-						long journey_id = journey_record.getId();
-						expanded_journey.setId(journey_id);
-						journey_record.setSteps(steps);
-						steps.stream().map(temp_step -> journey_service.addStep(journey_id, temp_step.getId()));
-					}
-					else {
+					if(journey_record != null) {
 						continue;
 					}
+
+					journey_record = journey_service.save(domain_map.getId(), expanded_journey);
+					long journey_id = journey_record.getId();
+					journey_record.setSteps(steps);
+					steps.stream().map(temp_step -> journey_service.addStep(journey_id, temp_step.getId()));
 					//add journey to domain map
-					domain_map_service.addJourneyToDomainMap(expanded_journey.getId(), domain_map.getId());
+					domain_map_service.addJourneyToDomainMap(journey_record.getId(), domain_map.getId());
 
 					//add journey to list of elements to explore for click or typing interactions
 					JourneyCandidateMessage candidate = new JourneyCandidateMessage(journey_record, 
