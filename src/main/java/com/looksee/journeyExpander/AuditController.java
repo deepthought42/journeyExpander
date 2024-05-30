@@ -132,6 +132,7 @@ public class AuditController {
 			log.warn("domain = "+domain);
 			log.warn("domain id = "+domain.getId());
 			log.warn("journey_result_page.getUrl = "+journey_result_page.getUrl());
+			log.warn("journey result page id = "+journey_result_page.getId());
 			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl())) {
 				//create and save journey
 				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK); 
@@ -142,7 +143,7 @@ public class AuditController {
 			
 			List<Step> page_steps = step_service.getStepsWithStartPage(journey_result_page, domain_map.getId());
 			if(page_steps.size() > 1) {
-				log.warn("RETURNING WITHOUT EXPNASION!!!!  Steps were found that start with page with key = "+journey_result_page.getKey());
+				log.warn("RETURNING WITHOUT EXPANSION!!!!  Steps were found that start with page with key = "+journey_result_page.getKey());
 				return new ResponseEntity<String>("RETURNING WITHOUT EXPANSION!!!!  Steps were found that start with page with key"+journey_result_page.getKey(), HttpStatus.OK);
 			}
 			
@@ -160,7 +161,7 @@ public class AuditController {
 			
 			//Filter out non interactive elements
 			//Filter out elements that are in explored map for PageState with key
-			//Filter out form elements
+			//Filter journey form elements
 			leaf_elements = leaf_elements.parallelStream()
 											.filter(element -> element.isVisible())
 											.filter(element -> !BrowserService.isStructureTag(element.getName()))
