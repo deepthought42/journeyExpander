@@ -8,9 +8,11 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.looksee.journeyExpander.models.Audit;
+import com.looksee.journeyExpander.models.AuditRecord;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageAuditRecord;
 import com.looksee.journeyExpander.models.PageState;
@@ -23,6 +25,8 @@ import com.looksee.journeyExpander.models.repository.ElementStateRepository;
 import com.looksee.journeyExpander.models.repository.PageStateRepository;
 import com.looksee.journeyExpander.models.repository.ScreenshotRepository;
 
+import io.github.resilience4j.retry.annotation.Retry;
+
 
 
 /**
@@ -30,6 +34,7 @@ import com.looksee.journeyExpander.models.repository.ScreenshotRepository;
  *
  */
 @Service
+@Retry(name="neo4j")
 public class PageStateService {
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(PageStateService.class.getName());
@@ -98,6 +103,12 @@ public class PageStateService {
 		return element_state_repo.getElementStates(page_key);
 	}
 	
+	/**
+	 * 
+	 * @param page_state_id
+	 * @return
+	 */
+	@Retryable
 	public List<ElementState> getElementStates(long page_state_id){
 		return element_state_repo.getElementStates(page_state_id);
 	}

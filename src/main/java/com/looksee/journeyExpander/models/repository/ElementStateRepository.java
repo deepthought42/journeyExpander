@@ -12,10 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.looksee.journeyExpander.models.Domain;
 import com.looksee.journeyExpander.models.ElementState;
 
-import io.github.resilience4j.retry.annotation.Retry;
-
 @Repository
-@Retry(name = "neoforj")
 public interface ElementStateRepository extends Neo4jRepository<ElementState, Long> {
 	
 	@Query("MATCH (e:ElementState{key:$key}) RETURN e LIMIT 1")
