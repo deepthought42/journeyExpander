@@ -42,7 +42,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.cloud.storage.StorageException;
 import com.looksee.journeyExpander.gcp.CloudVisionUtils;
 import com.looksee.journeyExpander.gcp.GoogleCloudStorage;
 import com.looksee.journeyExpander.gcp.ImageSafeSearchAnnotation;
@@ -297,188 +296,6 @@ public class BrowserService {
     }
 	
 	/**
-	 * Process used by the web crawler to build {@link PageState} from {@link PageVersion}
-	 * 
-	 * @param url
-	 * @return
-	 * @throws IOException 
-	 * @throws XPathExpressionException 
-	 * @throws Exception
-	 */
-	public PageState buildPageState(URL url) throws Exception {
-		assert url != null;
-		
-		int http_status = BrowserUtils.getHttpStatus(url);
-		//usually code 301 is returned which is a redirect, which is usually transferring to https
-		if(http_status == 404 || http_status == 408) {
-			return null;
-		}
-		
-		PageState page_state = null;
-		boolean complete = false;
-		int cnt = 0;
-		do {
-			log.warn("getting browser connection... ");
-			Browser browser = null;
-			try {
-				browser = getConnection(BrowserType.CHROME, BrowserEnvironment.DISCOVERY);
-				browser.navigateTo(url.toString());
-
-				page_state = performBuildPageProcess( browser);
-				complete = true;
-				cnt=Integer.MAX_VALUE;
-			}
-			catch(MalformedURLException e) {
-				break;
-			}
-			catch(IOException e) {
-				log.warn("IOException occurred while building page state");
-				e.printStackTrace();
-			}
-			catch(ServiceUnavailableException e) {
-				log.warn("Service unavailable exception occurred while building page state");
-				//e.printStackTrace();
-			}
-			catch(WebDriverException | GridException e) {								
-				log.warn("Selenium Exception occurred while building page state :: "+url);
-			}
-			catch(Exception e) {
-				log.warn("Exception occurred while building page state");
-				e.printStackTrace();
-			}
-			finally {
-				if(browser != null) {
-					browser.close();
-				}
-			}
-			cnt++;
-		}while(!complete && cnt < 10);
-		
-		return page_state;
-	}
-	
-	/**
-	 * Navigates to a url, checks that the service is available, then removes drift 
-	 * 	chat client from page if it exists. Finally it builds a {@link PageState}
-	 * 
-	 * @param url
-	 * @param browser TODO
-	 * 
-	 * @pre url != null;
-	 * @pre browser != null
-	 * 
-	 * @return {@link PageState}
-	 * @throws WebDriverException 
-	 * @throws  
-	 * 
-	 * @throws MalformedURLException
-	 * @throws IOException 
-	 * @throws GridException 
-	 */
-	public PageState performBuildPageProcess(Browser browser) throws WebDriverException, IOException 
-	{
-		assert browser != null;
-		
-		if(browser.is503Error()) {
-			browser.close();
-			throw new ServiceUnavailableException("503(Service Unavailable) Error encountered. Starting over..");
-		}
-		browser.removeDriftChat();
-		
-		return buildPageState(browser);
-	}
-
-	/**
-	 *Constructs a page object that contains all child elements that are considered to be potentially expandable.
-	 * @param url_after_loading TODO
-	 * @param title TODO
-	 * @return page {@linkplain PageState}
-	 * @throws StorageException 
-	 * @throws GridException 
-	 * @throws IOException 
-	 * @throws XPathExpressionException 
-	 * @throws Exception 
-	 * 
-	 * @pre browser != null
-	 */
-	public PageState buildPageState( Browser browser ) throws WebDriverException, IOException {
-		assert browser != null;
-
-		URL current_url = new URL(browser.getDriver().getCurrentUrl());
-		String url_without_protocol = BrowserUtils.getPageUrl(current_url.toString());
-		log.warn("building page state for URL :: "+current_url);
-		if(current_url.toString().contains("dashboard")) {
-			log.warn("BUILDING DASHBOARD PAGE STATE...");
-			log.warn("url_without_protocol = "+url_without_protocol);
-		}
-		else if(current_url.toString().contains("?#")) {
-			log.warn("BUILDING    ?#   PAGE STATE..."+current_url);
-		}
-
-		boolean is_secure = BrowserUtils.checkIfSecure(current_url);
-        int status_code = BrowserUtils.getHttpStatus(current_url);
-
-        //remove 3rd party chat apps such as drift, and ...(NB: fill in as more identified)
-        //browser.removeDriftChat();
-        
-        //scroll to bottom then back to top to make sure all elements that may be hidden until the page is scrolled
-		String source = browser.getDriver().getPageSource();
-		String title = browser.getDriver().getTitle();
-
-		//List<ElementState> elements = extractElementStates(source, url, browser);
-		BufferedImage viewport_screenshot = browser.getViewportScreenshot();
-		String screenshot_checksum = ImageUtils.getChecksum(viewport_screenshot);
-		String viewport_screenshot_url = GoogleCloudStorage.saveImage(viewport_screenshot, 
-																	  current_url.getHost(), 
-																	  screenshot_checksum, 
-																	  BrowserType.create(browser.getBrowserName()));
-		viewport_screenshot.flush();
-		
-		BufferedImage full_page_screenshot = browser.getFullPageScreenshotStitched();		
-		
-		//BufferedImage shutterbug_fullpage_screenshot = browser.getFullPageScreenshot();
-		
-		/*
-		if(full_page_screenshot.getHeight() < (shutterbug_fullpage_screenshot.getHeight() - viewport_screenshot.getHeight()) ) {
-			full_page_screenshot = shutterbug_fullpage_screenshot;
-		}
-		*/
-		String full_page_screenshot_checksum = ImageUtils.getChecksum(full_page_screenshot);
-		String full_page_screenshot_url = GoogleCloudStorage.saveImage(full_page_screenshot, 
-																		current_url.getHost(), 
-																		full_page_screenshot_checksum, 
-																		BrowserType.create(browser.getBrowserName()));
-		full_page_screenshot.flush();
-		
-		String composite_url = full_page_screenshot_url;
-		long x_offset = browser.getXScrollOffset();
-		long y_offset = browser.getYScrollOffset();
-		Dimension size = browser.getDriver().manage().window().getSize();
-
-		PageState page_state = new PageState(
-										viewport_screenshot_url,
-										new ArrayList<>(),
-										source,
-										false,
-										x_offset,
-										y_offset,
-										size.getWidth(),
-										size.getHeight(),
-										BrowserType.CHROME,
-										full_page_screenshot_url,
-										full_page_screenshot.getWidth(), 
-										full_page_screenshot.getHeight(), 
-										url_without_protocol,
-										title,
-										is_secure,
-										status_code, 
-										composite_url,
-										current_url.toString());
-
-		return page_state;
-	}
-	
-	/**
 	 * Process used by the web crawler to build {@link PageElement} list based on the xpaths on the page
 	 * @param xpaths TODO
 	 * @param audit_id TODO
@@ -496,7 +313,7 @@ public class BrowserService {
 												int page_height
 	) throws MalformedURLException {
 		assert page_state != null;
-   				
+
 		List<ElementState> elements = new ArrayList<>();
 		Map<String, ElementState> elements_mapped = new HashMap<>();
 		boolean rendering_incomplete = true;
