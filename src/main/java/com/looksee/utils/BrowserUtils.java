@@ -1046,7 +1046,7 @@ public class BrowserUtils {
 				log.warn("Malformed URL exception occurred for  "+sanitized_url);
 				break;
 			}
-			catch(WebDriverException | GridException e) {								
+			catch(WebDriverException | GridException e) {
 				log.warn("failed to obtain page source during crawl of :: "+sanitized_url);
 			}
 			finally {
@@ -1106,5 +1106,9 @@ public class BrowserUtils {
 		}
 		
 		return img_elements;
+	}
+		
+	public static String calculateSha256(String value) {
+		return org.apache.commons.codec.digest.DigestUtils.sha256Hex(value);
 	}
 }
