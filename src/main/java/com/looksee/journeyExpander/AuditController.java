@@ -40,7 +40,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.looksee.journeyExpander.gcp.PubSubErrorPublisherImpl;
 import com.looksee.journeyExpander.gcp.PubSubJourneyCandidatePublisherImpl;
 import com.looksee.journeyExpander.mapper.Body;
 import com.looksee.journeyExpander.models.Domain;
@@ -90,9 +89,6 @@ public class AuditController {
 	private StepService step_service;
 	
 	@Autowired
-	private PubSubErrorPublisherImpl pubSubErrorPublisherImpl;
-	
-	@Autowired
 	private PubSubJourneyCandidatePublisherImpl journey_candidate_topic;
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
@@ -129,10 +125,6 @@ public class AuditController {
 			log.warn("Looking up domain by audit record id = "+journey_msg.getAuditRecordId());
 			//if start page is external then don't expand
 			Domain domain = domain_service.findByAuditRecord(journey_msg.getAuditRecordId());
-			log.warn("domain = "+domain);
-			log.warn("domain id = "+domain.getId());
-			log.warn("journey_result_page.getUrl = "+journey_result_page.getUrl());
-			log.warn("journey result page id = "+journey_result_page.getId());
 			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl())) {
 				//create and save journey
 				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK); 
@@ -142,6 +134,7 @@ public class AuditController {
 			DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getAuditRecordId());
 			
 			List<Step> page_steps = step_service.getStepsWithStartPage(journey_result_page, domain_map.getId());
+			log.warn("steps found = "+page_steps.size()+";  for url = "+journey_result_page.getUrl());
 			if(page_steps.size() > 1) {
 				log.warn("RETURNING WITHOUT EXPANSION!!!!  Steps were found that start with page with key = "+journey_result_page.getKey());
 				return new ResponseEntity<String>("RETURNING WITHOUT EXPANSION!!!!  Steps were found that start with page with key"+journey_result_page.getKey(), HttpStatus.OK);
@@ -163,7 +156,6 @@ public class AuditController {
 			//Filter out elements that are in explored map for PageState with key
 			//Filter journey form elements
 			leaf_elements = leaf_elements.parallelStream()
-											.filter(element -> element.isVisible())
 											.filter(element -> !BrowserService.isStructureTag(element.getName()))
 											.filter(element -> {
 													Dimension dimension = new Dimension(element.getWidth(), element.getHeight()); 

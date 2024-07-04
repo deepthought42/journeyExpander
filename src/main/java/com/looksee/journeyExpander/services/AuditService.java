@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.looksee.journeyExpander.models.Audit;
 import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.ElementStateIssueMessage;
 import com.looksee.journeyExpander.models.ImageElementState;
@@ -29,7 +30,6 @@ import com.looksee.journeyExpander.models.enums.AuditName;
 import com.looksee.journeyExpander.models.enums.AuditSubcategory;
 import com.looksee.journeyExpander.models.enums.ObservationType;
 import com.looksee.journeyExpander.models.repository.AuditRepository;
-import com.looksee.journeyExpander.models.Audit;
 
 import io.github.resilience4j.retry.annotation.Retry;
 
@@ -133,8 +133,7 @@ public class AuditService {
 			SimplePage simple_page = new SimplePage(
 											page_state.getUrl(), 
 											page_state.getViewportScreenshotUrl(), 
-											page_state.getFullPageScreenshotUrlOnload(), 
-											page_state.getFullPageScreenshotUrlComposite(), 
+											page_state.getFullPageScreenshotUrl(), 
 											page_state.getFullPageWidth(),
 											page_state.getFullPageHeight(),
 											page_state.getSrc(), 

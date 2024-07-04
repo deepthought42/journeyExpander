@@ -31,4 +31,7 @@ public interface JourneyRepository extends Neo4jRepository<Journey, Long>  {
 
 	@Query("MATCH (map:DomainMap) WHERE id(map)=$map_id MATCH (map)-[:CONTAINS]->(j:Journey{candidateKey:$candidateKey}) RETURN j LIMIT 1")
 	public Journey findByCandidateKey(@Param("map_id") long domain_map_id, @Param("candidateKey") String candidate_key);
+
+	@Query("MATCH (map:DomainMap) WHERE id(map)=$map_id MATCH (map)-[:CONTAINS]->(j:Journey) WHERE j.candidateKey=$candidateKey OR j.key=$key RETURN j LIMIT 1")
+    public Journey findByKeyOrCandidateKey(@Param("map_id") long domain_map_id, @Param("key") String key, @Param("candidateKey") String candidateKey);
 }

@@ -1,20 +1,18 @@
 package com.looksee.journeyExpander.models;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.aspectj.weaver.ast.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.neo4j.core.schema.CompositeProperty;
 import org.springframework.data.neo4j.core.schema.Node;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.looksee.journeyExpander.models.enums.ElementClassification;
 
 
@@ -52,9 +50,7 @@ public class ElementState extends LookseeObject implements Comparable<ElementSta
 	private double textContrast;
 	private double nonTextContrast;
 	private boolean imageFlagged;
-	
-	private boolean visible;
-	
+		
 	@CompositeProperty
 	private Map<String, String> renderedCssValues = new HashMap<>();
 	
@@ -102,7 +98,6 @@ public class ElementState extends LookseeObject implements Comparable<ElementSta
 						int height, 
 						ElementClassification classification, 
 						String outer_html, 
-						boolean is_visible, 
 						String css_selector, 
 						String font_color, 
 						String background_color,
@@ -129,7 +124,6 @@ public class ElementState extends LookseeObject implements Comparable<ElementSta
 		setCssSelector(css_selector);
 		setClassification(classification);
 		setXpath(xpath);
-		setVisible(is_visible);
 		setForegroundColor(font_color);
 		setBackgroundColor(background_color);
 		setImageFlagged(image_flagged);
@@ -374,14 +368,6 @@ public class ElementState extends LookseeObject implements Comparable<ElementSta
 
 	public void setRenderedCssValues(Map<String, String> rendered_css_values) {
 		this.renderedCssValues.putAll(rendered_css_values);
-	}
-
-	public boolean isVisible() {
-		return visible;
-	}
-
-	public void setVisible(boolean visible) {
-		this.visible = visible;
 	}
 
 	public String getXpath() {
