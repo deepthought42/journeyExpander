@@ -59,6 +59,16 @@ public class JourneyService {
 		return journey_record;
 	}
 	
+	/**
+	 * Updates the status, key, and ordered_ids fields for {@link Journey} stored in database
+	 * 
+	 * @param journey_id
+	 * @param status
+	 * @param key
+	 * @param ordered_ids
+	 * 
+	 * @return {@link Journey} after saving
+	 */
 	public Journey updateFields(long journey_id, JourneyStatus status, String key, List<Long> ordered_ids) {
 		return journey_repo.updateFields(journey_id, status, key, ordered_ids);
 	}
