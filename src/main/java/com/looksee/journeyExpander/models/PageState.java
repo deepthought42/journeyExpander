@@ -29,6 +29,7 @@ import com.looksee.journeyExpander.services.BrowserService;
 
 import lombok.Getter;
 import lombok.Setter;
+
 /**
  * A reference to a web page
  *
@@ -89,6 +90,10 @@ public class PageState extends LookseeObject {
 	@Getter
 	@Setter
 	private boolean elementExtractionComplete;
+	
+	@Getter
+	@Setter
+	private boolean interactiveElementExtractionComplete;
 	
 	@Getter
 	@Setter
@@ -155,7 +160,6 @@ public class PageState extends LookseeObject {
 		setBrowser(BrowserType.CHROME);
 		setElementExtractionComplete(false);
 		setAuditRecordId(-1L);
-		
 	}
 	
 	/**
@@ -180,7 +184,7 @@ public class PageState extends LookseeObject {
 	 * @throws MalformedURLException 
 	 */
 	public PageState(String screenshot_url, 
-					String src, 
+					String src,
 					long scroll_x_offset, 
 					long scroll_y_offset, 
 					int viewport_width,
@@ -201,7 +205,6 @@ public class PageState extends LookseeObject {
 					Set<String> icon_links
 	) {
 		assert screenshot_url != null;
-		assert elements != null;
 		assert src != null;
 		assert !src.isEmpty();
 		assert browser_type != null;
@@ -230,8 +233,9 @@ public class PageState extends LookseeObject {
 		setStylesheetUrls( stylesheets);
 		setScriptUrls( script_urls);
 		setFaviconUrl(icon_links);
-		setKeywords(new HashSet<>());
+		setInteractiveElementExtractionComplete(false);
 		setElementExtractionComplete(false);
+		setKeywords(new HashSet<>());
 		setAuditRecordId(audit_record_id);
 		setGeneralizedSrc(BrowserService.generalizeSrc(src));
 		setKey(generateKey());
@@ -418,7 +422,6 @@ public class PageState extends LookseeObject {
 		}
 	}
 
-	
 	@Override
 	public String toString() {
 		return "(page => { key = "+getKey()+"; url = "+getUrl();
