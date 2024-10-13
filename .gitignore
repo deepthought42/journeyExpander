@@ -30,6 +30,7 @@ hs_err_pid*
 .settings/
 
 *.prod
+*.stage
 
 .classpath
 

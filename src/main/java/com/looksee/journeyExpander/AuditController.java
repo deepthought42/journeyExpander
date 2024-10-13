@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import org.openqa.selenium.Dimension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +103,7 @@ public class AuditController {
 
 	    Journey journey = journey_msg.getJourney();
 	    
-	    log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey.getId());
+	    //log.warn("JOURNEY EXPANSION MANAGER received new JOURNEY for mapping :  "+journey.getId());
 		List<String> interactive_elements = new ArrayList<>();
 		List<Step> journey_steps = journey.getSteps();
 
@@ -122,7 +121,6 @@ public class AuditController {
 				journey_result_page = journey_steps.get(journey_steps.size()-1).getEndPage();
 			}
 			
-			log.warn("Looking up domain by audit record id = "+journey_msg.getAuditRecordId());
 			//if start page is external then don't expand
 			Domain domain = domain_service.findByAuditRecord(journey_msg.getAuditRecordId());
 			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl())) {
@@ -132,11 +130,9 @@ public class AuditController {
 			
 			//if the page has already been expanded then don't expand the journey for this page
 			DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getAuditRecordId());
-			
 			List<Step> page_steps = step_service.getStepsWithStartPage(journey_result_page, domain_map.getId());
-			log.warn("steps found = "+page_steps.size()+";  for url = "+journey_result_page.getUrl());
 			if(page_steps.size() > 1) {
-				log.warn("RETURNING WITHOUT EXPANSION!!!!  Steps were found that start with page with key = "+journey_result_page.getKey());
+				//log.warn("RETURNING WITHOUT EXPANSION!!!!  Steps were found that start with page with key = "+journey_result_page.getKey());
 				return new ResponseEntity<String>("RETURNING WITHOUT EXPANSION!!!!  Steps were found that start with page with key"+journey_result_page.getKey(), HttpStatus.OK);
 			}
 			
@@ -150,22 +146,35 @@ public class AuditController {
 			//get all elements then filter for interactive elements
 			List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
 			journey_result_page.setElements(leaf_elements);
-			log.warn(leaf_elements.size()+" interactive elements found");
+			log.warn(leaf_elements.size()+" leaf elements found for url = "+journey_result_page.getUrl() + " with id = "+journey_result_page.getId());
 			
 			//Filter out non interactive elements
 			//Filter out elements that are in explored map for PageState with key
 			//Filter journey form elements
 			leaf_elements = leaf_elements.parallelStream()
 											.filter(element -> !BrowserService.isStructureTag(element.getName()))
+											/*
 											.filter(element -> {
 													Dimension dimension = new Dimension(element.getWidth(), element.getHeight()); 
 													return BrowserService.hasWidthAndHeight(dimension);
 											})
-											.filter(element -> element.getXLocation() >= 0 && element.getYLocation() >= 0)
-											.filter(element -> !ElementStateUtils.isFormElement(element))
+													 */
+											//.filter(element -> element.getXLocation() >= 0 && element.getYLocation() >= 0)
+											//.filter(element -> !ElementStateUtils.isFormElement(element))
 											.filter(element -> ElementStateUtils.isInteractiveElement(element))
 											.collect(Collectors.toList());
 			
+			
+			if(journey_result_page.getUrl().contains("blog")){
+				log.warn("blog page was found with "+leaf_elements.size()+" to expand");
+				
+				for(ElementState element: leaf_elements){
+					log.warn("element xpath = "+element.getXpath());
+					log.warn("element cssSelector = "+element.getCssSelector());
+					log.warn("-------------------------------------------");
+				}
+			}
+
 			//filter elements that were in previous page
 			String current_url = "";
 			for(int i=journey_steps.size()-1; i>=0; i--) {
@@ -204,7 +213,6 @@ public class AuditController {
 					
 					if(domain_map == null) {
 						domain_map = domain_map_service.save(new DomainMap());
-						log.warn("adding domain map to audit record = " + journey_msg.getAuditRecordId());
 						audit_record_service.addDomainMap(journey_msg.getAuditRecordId(), domain_map.getId());
 					}
 					
