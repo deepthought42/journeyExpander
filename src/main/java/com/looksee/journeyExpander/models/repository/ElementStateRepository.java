@@ -42,7 +42,7 @@ public interface ElementStateRepository extends Neo4jRepository<ElementState, Lo
 	@Query("MATCH (p:PageState{key:$page_state_key})-[*]->(parent_elem:ElementState) MATCH (parent_elem)-[:HAS_CHILD]->(e:ElementState{key:$element_state_key}) RETURN parent_elem LIMIT 1")
 	public ElementState getParentElement(@Param("page_state_key") String page_state_key, @Param("element_state_key") String element_state_key);
 
-	@Query("MATCH (parent:ElementState{key:$parent_key}) WITH parent MATCH (child:ElementState{key:$child_key}) MERGE (parent)-[:HAS_CHILD]->(child) RETURN parent")
+	@Query("MATCH (parent:ElementState{key:$parent_key}) MATCH (child:ElementState{key:$child_key}) MERGE (parent)-[:HAS_CHILD]->(child) RETURN parent")
 	public void addChildElement(@Param("parent_key") String parent_key, @Param("child_key") String child_key);
 
 	@Query("MATCH (p:PageState{key:$page_state_key})-[*]->(parent_elem:ElementState) MATCH (parent_elem)-[:HAS_CHILD]->(e:ElementState{key:$element_state_key}) RETURN parent_elem LIMIT 1")
@@ -63,7 +63,7 @@ public interface ElementStateRepository extends Neo4jRepository<ElementState, Lo
 	@Query("MATCH (p:PageState)-[:HAS]->(e:ElementState{classification:'LEAF'}) where id(p)=$page_state_id AND e.visible=true RETURN e")
 	public List<ElementState> getVisibleLeafElements(@Param("page_state_id") long page_state_id);
 
-	@Query("MATCH (p:PageState) WITH p MATCH (element:ElementState) WHERE id(p)=$page_id AND id(element)=$element_id MERGE (p)-[:HAS]->(element) RETURN element LIMIT 1")
+	@Query("MATCH (p:PageState) WHERE id(p)=$page_id MATCH (element:ElementState) WHERE id(element)=$element_id MERGE (p)-[:HAS]->(element) RETURN element LIMIT 1")
 	public ElementState addElement(@Param("page_id") long page_id, @Param("element_id") long element_id);
 
 	@Query("MATCH (p:PageState)-[:HAS]->(element:ElementState) WHERE id(p)=$page_id AND id(element)=$element_id RETURN element ORDER BY p.created_at DESC LIMIT 1")
@@ -87,25 +87,25 @@ public interface ElementStateRepository extends Neo4jRepository<ElementState, Lo
 	@Query("MATCH (p:PageState)-[:HAS]->(e:ElementState{name:'a'}) WHERE id(p)=$page_state_id RETURN DISTINCT e")
 	public List<ElementState> getLinkElementStates(@Param("page_state_id") long page_state_id);
 	
-	@Query("MATCH (s:Step) WITH s MATCH (p:ElementState) WHERE id(s)=$step_id AND id(p)=$element_state_id MERGE (s)-[:HAS]->(p) RETURN p")
+	@Query("MATCH (s:Step) MATCH (p:ElementState) WHERE id(s)=$step_id AND id(p)=$element_state_id MERGE (s)-[:HAS]->(p) RETURN p")
 	public ElementState addElementState(@Param("step_id") long id, @Param("element_state_id") long element_state_id);
 
 	@Query("MATCH (:ElementInteractionStep{key:$step_key})-[:HAS]->(e:ElementState) RETURN e")
 	public ElementState getElementStateForStep(@Param("step_key") String step_key);
 
-	@Query("MATCH (s:Step) WITH s MATCH (e:ElementState) WHERE id(s)=$step_id AND id(e)=$element_id MERGE (s)-[:USERNAME_INPUT]->(e) RETURN e")
+	@Query("MATCH (s:Step) MATCH (e:ElementState) WHERE id(s)=$step_id AND id(e)=$element_id MERGE (s)-[:USERNAME_INPUT]->(e) RETURN e")
 	public ElementState addUsernameElement(@Param("step_id") long id, @Param("element_id") long element_id);
 	
 	@Query("MATCH (s:LoginStep)-[:USERNAME_INPUT]->(e:ElementState) WHERE id(s)=$step_id RETURN e")
 	public ElementState getUsernameElement(@Param("step_id") long id);
 	
-	@Query("MATCH (s:Step) WITH s MATCH (e:ElementState) WHERE id(s)=$step_id AND id(e)=$element_id MERGE (s)-[:PASSWORD_INPUT]->(e) RETURN e")
+	@Query("MATCH (s:Step) MATCH (e:ElementState) WHERE id(s)=$step_id AND id(e)=$element_id MERGE (s)-[:PASSWORD_INPUT]->(e) RETURN e")
 	public ElementState addPasswordElement(@Param("step_id") long id, @Param("element_id") long element_id);
 	
 	@Query("MATCH (s:LoginStep)-[:PASSWORD_INPUT]->(e:ElementState) WHERE id(s)=$step_id RETURN e")
 	public ElementState getPasswordElement(@Param("step_id") long id);
 	
-	@Query("MATCH (s:Step) WITH s MATCH (e:ElementState) WHERE id(s)=$step_id AND id(e)=$element_id MERGE (s)-[:SUBMIT]->(e) RETURN e")
+	@Query("MATCH (s:Step) MATCH (e:ElementState) WHERE id(s)=$step_id AND id(e)=$element_id MERGE (s)-[:SUBMIT]->(e) RETURN e")
 	public ElementState addSubmitElement(@Param("step_id") long id, @Param("element_id") long element_id);
 
 	@Query("MATCH (s:LoginStep)-[:SUBMIT]->(e:ElementState) WHERE id(s)=$step_id RETURN e")
