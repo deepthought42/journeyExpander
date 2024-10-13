@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.looksee.journeyExpander.models.ElementState;
 import com.looksee.journeyExpander.models.PageState;
 import com.looksee.journeyExpander.models.journeys.LandingStep;
 import com.looksee.journeyExpander.models.journeys.LoginStep;
@@ -15,7 +14,6 @@ import com.looksee.journeyExpander.models.journeys.SimpleStep;
 import com.looksee.journeyExpander.models.journeys.Step;
 import com.looksee.journeyExpander.models.repository.LandingStepRepository;
 import com.looksee.journeyExpander.models.repository.LoginStepRepository;
-import com.looksee.journeyExpander.models.repository.PageStateRepository;
 import com.looksee.journeyExpander.models.repository.SimpleStepRepository;
 import com.looksee.journeyExpander.models.repository.StepRepository;
 
@@ -32,9 +30,6 @@ public class StepService {
 
 	@Autowired
 	private StepRepository step_repo;
-	
-	@Autowired
-	private PageStateRepository page_state_repo;
 	
 	@Autowired
 	private SimpleStepRepository simple_step_repo;
@@ -145,10 +140,6 @@ public class StepService {
 		
 		return null;
 	}
-
-	public ElementState getElementState(String step_key) {
-		return step_repo.getElementState(step_key);
-	}
 	
 
 	/**
@@ -168,24 +159,12 @@ public class StepService {
 		return step_repo.getStepsWithStartPage(domain_map_id, page_state.getId());
 	}
 
-	public List<Step> getStepsWithStartPage(long domainAuditRecordId, PageState page_state) {
-		return step_repo.getStepsWithStartPage(domainAuditRecordId, page_state.getKey());
-	}
-	
-	public PageState getEndPage(long id) {
-		return page_state_repo.getEndPageForStep(id);
-	}
-	
 	public void setElementState(long step_id, long element_id) {
 		step_repo.setElementState(step_id, element_id);
 	}
 
 	public void addEndPage(long step_id, long page_id) {
 		step_repo.addEndPage(step_id, page_id);
-	}
-
-	public Step updateKey(long step_id, String key) {
-		return step_repo.updateKey(step_id, key);
 	}
 
 	public void setStartPage(Long step_id, Long page_id) {

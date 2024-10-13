@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.looksee.journeyExpander.models.DomainAuditRecord;
 import com.looksee.journeyExpander.models.journeys.DomainMap;
 import com.looksee.journeyExpander.models.repository.DomainMapRepository;
 
@@ -40,6 +41,12 @@ public class DomainMapService {
 		domain_map_repo.addJourneyToDomainMap(journey_id, domain_map_id);
 	}
 
+	/**
+	 * retrieves {@link DomainMap} that is associated with the 
+	 * 		{@link DomainAuditRecord} that has the given id
+	 * @param domain_audit_id
+	 * @return
+	 */
 	public DomainMap findByDomainAuditId(long domain_audit_id) {
 		return domain_map_repo.findByDomainAuditId(domain_audit_id);
 	}
