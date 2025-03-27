@@ -27,6 +27,7 @@ gmail_credentials.json
 
 /.vscode/
 /target/
+/node_modules/
 
 .settings/
 
