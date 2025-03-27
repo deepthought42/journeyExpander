@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/deepthought42/journeyExpander/compare/v1.0.0...v1.0.1) (2025-03-27)
+
+
+### Bug Fixes
+
+* corrected docker build names and tags ([34f3c8f](https://github.com/deepthought42/journeyExpander/commit/34f3c8f52b88688da82dfdc0281743258e6438ed))
+
 # 1.0.0 (2025-03-27)
 
 
