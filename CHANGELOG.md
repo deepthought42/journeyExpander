@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/deepthought42/journeyExpander/compare/v1.0.1...v1.0.2) (2025-03-27)
+
+
+### Bug Fixes
+
+* renamed jar file executed in Dockerfile ([856f712](https://github.com/deepthought42/journeyExpander/commit/856f7129dce8d9bf5a54786acd1ad9c32e76728a))
+
 ## [1.0.1](https://github.com/deepthought42/journeyExpander/compare/v1.0.0...v1.0.1) (2025-03-27)
 
 
