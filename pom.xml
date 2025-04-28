@@ -117,22 +117,6 @@
 		    <version>4.3.0</version>
 		</dependency>
 		
-		<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-gcp-startegoogler-pubsub -->
-		<!--
-		<dependency>
-		    <groupId>org.springframework.cloud</groupId>
-		    <artifactId>spring-cloud-gcp-starter-pubsub</artifactId>
-		    <version>1.2.8.RELEASE</version>
-		</dependency>
--->
-
-		<dependency>
-		  <groupId>com.pusher</groupId>
-		  <artifactId>pusher-http-java</artifactId>
-		  <version>1.0.0</version>
-		</dependency>
-		
-	    <!-- [END pubsub_spring_integration] -->
 	    <!-- [START pubsub_spring_cloud_stream_binder] -->
 	    <dependency>
 	      	<groupId>com.google.cloud</groupId>
