@@ -112,6 +112,6 @@ jobs:
           tag_name: v${{ env.VERSION }}
           name: Release v${{ env.VERSION }}
           body_path: CHANGELOG.md
-          files: PageBuilder-${{ env.VERSION }}.jar
+          files: journeyExpander-${{ env.VERSION }}.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
