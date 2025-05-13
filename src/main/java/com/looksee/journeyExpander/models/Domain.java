@@ -6,15 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.neo4j.core.schema.Relationship;
-import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 
 
 
 
-/**
- * Encompasses a domain name as well as all {@link Test}s and {@link Group}s 
- * belong to this domain
- */
+
 public class Domain extends LookseeObject{
 	
 	private String url;
@@ -51,9 +47,9 @@ public class Domain extends LookseeObject{
 	 * @param browser name of the browser ie. chrome, firefox, etc.
 	 * @param logo_url url of logo image file
 	 */
-	public Domain( String protocol, 
-				   String host, 
-				   String path, 
+	public Domain( String protocol,
+				   String host,
+				   String path,
 				   String logo_url
 	){
 		setLogoUrl(logo_url);

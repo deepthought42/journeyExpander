@@ -12,7 +12,7 @@ import com.looksee.journeyExpander.models.enums.Priority;
 
 
 /**
- * A observation of potential error for a given color palette 
+ * A observation of potential error for a given color palette
  */
 @Node
 public class ColorContrastIssueMessage extends ElementStateIssueMessage{

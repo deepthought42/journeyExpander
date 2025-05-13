@@ -1,7 +1,5 @@
 package com.looksee.journeyExpander.models;
 
-import java.util.UUID;
-
 public class Label extends LookseeObject{
 	private String description;
 	private float score;

@@ -1,22 +1,27 @@
 package com.looksee.browsing;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import org.openqa.grid.common.exception.GridException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.slf4j.Logger;
 
-import com.looksee.journeyExpander.models.enums.Action;
+import com.looksee.journeyExpander.models.Browser;
 import com.looksee.journeyExpander.models.Element;
 import com.looksee.journeyExpander.models.ElementState;
+import com.looksee.journeyExpander.models.enums.Action;
 import com.looksee.journeyExpander.services.BrowserService;
 import com.looksee.utils.TimingUtils;
 
@@ -138,10 +143,10 @@ public class Crawler {
 		}
 		
 		if(path.getSteps().size() != path_keys.size()){
-			return new JourneyMessage(path.getSteps(), 
-								   path.getStatus(), 
-								   path.getBrowser(), 
-								   path.getDomainId(), 
+			return new JourneyMessage(path.getSteps(),
+								   path.getStatus(),
+								   path.getBrowser(),
+								   path.getDomainId(),
 								   path.getAccountId());
 		}
 		
