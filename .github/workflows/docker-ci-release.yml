@@ -3,7 +3,7 @@ name: Build and Release
 on:
   pull_request:
     branches:
-      - master
+      - main
     types: [closed]
     paths-ignore:
       - '**.md'
@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    # This job runs only when a PR is merged to master
+    # This job runs only when a PR is merged to main
     if: github.event.action == 'closed' && github.event.pull_request.merged == true
 
     steps:
@@ -30,7 +30,7 @@ jobs:
 
   bump-version:
     needs: test
-    # Run only when PR is merged to master
+    # Run only when PR is merged to main
     if: github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
@@ -59,7 +59,7 @@ jobs:
           
   build-and-release:
     needs: bump-version
-    # Run only when PR is merged to master
+    # Run only when PR is merged to main
     if: github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     env:
@@ -87,7 +87,7 @@ jobs:
       
   github-release:
     needs: bump-version
-    # Run only when PR is merged to master
+    # Run only when PR is merged to main
     if: github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     env:
