@@ -348,7 +348,7 @@
 							<arguments>
 								<argument>scripts/download-core.sh</argument>
 							</arguments>
-							<workingDirectory>${project.basedir}</workingDirectory>
+							<workingDirectory>${pom.basedir}</workingDirectory>
 						</configuration>
 					</execution>
 				</executions>
