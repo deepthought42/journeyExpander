@@ -25,6 +25,9 @@ jobs:
           distribution: 'adopt'
           java-version: '21'
 
+      - name: Download core JAR
+        run: bash scripts/download-core.sh
+
       - name: Test with Maven
         run: mvn test
 
@@ -103,7 +106,10 @@ jobs:
           distribution: 'adopt'
           java-version: '21'
       
-      - name: Test with Maven
+      - name: Download core JAR
+        run: bash scripts/download-core.sh
+      
+      - name: Maven install - skip tests
         run: mvn install -DskipTests
 
       - name: Create GitHub Release
