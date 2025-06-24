@@ -3,7 +3,7 @@
 # Download LookseeCore JAR from GitHub release
 # This script downloads the core-0.1.5.jar from the GitHub release
 
-VERSION="0.1.6"
+VERSION="0.1.7"
 REPO="deepthought42/LookseeCore"
 JAR_NAME="core-${VERSION}.jar"
 DOWNLOAD_URL="https://github.com/${REPO}/releases/download/v${VERSION}/${JAR_NAME}"
@@ -24,4 +24,4 @@ if [ $? -eq 0 ]; then
 else
     echo "Failed to download ${JAR_NAME}"
     exit 1
-fi 
+fi

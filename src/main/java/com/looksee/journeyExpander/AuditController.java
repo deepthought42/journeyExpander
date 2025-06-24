@@ -24,13 +24,11 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import org.openqa.selenium.remote.BrowserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.StreamingHttpOutputMessage.Body;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -41,15 +39,19 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.cloud.storage.Acl.Domain;
 import com.looksee.gcp.PubSubJourneyCandidatePublisherImpl;
+import com.looksee.mapper.Body;
+import com.looksee.models.Domain;
 import com.looksee.models.ElementState;
 import com.looksee.models.PageState;
+import com.looksee.models.enums.Action;
+import com.looksee.models.enums.BrowserType;
 import com.looksee.models.enums.JourneyStatus;
 import com.looksee.models.journeys.DomainMap;
 import com.looksee.models.journeys.Journey;
 import com.looksee.models.journeys.LandingStep;
 import com.looksee.models.journeys.SimpleStep;
+import com.looksee.models.journeys.Step;
 import com.looksee.models.message.JourneyCandidateMessage;
 import com.looksee.models.message.VerifiedJourneyMessage;
 import com.looksee.services.AuditRecordService;
@@ -89,8 +91,8 @@ public class AuditController {
 	private PubSubJourneyCandidatePublisherImpl journey_candidate_topic;
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
-	public ResponseEntity<String> receiveMessage(@RequestBody Body body) 
-			throws JsonMappingException, JsonProcessingException, ExecutionException, InterruptedException 
+	public ResponseEntity<String> receiveMessage(@RequestBody Body body)
+			throws JsonMappingException, JsonProcessingException, ExecutionException, InterruptedException
 	{
 		Body.Message message = body.getMessage();
 		String data = message.getData();
@@ -243,7 +245,7 @@ public class AuditController {
 					domain_map_service.addJourneyToDomainMap(journey_record.getId(), domain_map.getId());
 
 					//add journey to list of elements to explore for click or typing interactions
-					JourneyCandidateMessage candidate = new JourneyCandidateMessage(journey_record, 
+					JourneyCandidateMessage candidate = new JourneyCandidateMessage(journey_record,
 																					BrowserType.CHROME,
 																					journey_msg.getAccountId(),
 																					journey_msg.getAuditRecordId(),
@@ -296,8 +298,8 @@ public class AuditController {
 	/**
 	 * Checks if {@link Step} exists within the given {@link Journey}
 	 * 
-	 * @param journey
-	 * @param step
+	 * @param journey {@link Journey} to check for the given {@link Step}
+	 * @param step {@link Step} to check for in the given {@link Journey}
 	 * 
 	 * @return true if step already exists, otherwise false
 	 */

@@ -326,7 +326,7 @@
             <artifactId>core</artifactId>
             <version>0.1.7</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/libs/core-0.1.6.jar</systemPath>
+            <systemPath>${pom.basedir}/libs/core-0.1.7.jar</systemPath>
         </dependency>
 	</dependencies>
 
