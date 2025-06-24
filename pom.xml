@@ -324,9 +324,9 @@
 		<dependency>
             <groupId>com.looksee</groupId>
             <artifactId>core</artifactId>
-            <version>0.1.7</version>
+            <version>0.1.8</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/libs/core-0.1.7.jar</systemPath>
+            <systemPath>${pom.basedir}/libs/core-0.1.8.jar</systemPath>
         </dependency>
 	</dependencies>
 
@@ -348,7 +348,7 @@
 							<arguments>
 								<argument>scripts/download-core.sh</argument>
 							</arguments>
-							<workingDirectory>${pom.basedir}</workingDirectory>
+							<workingDirectory>${project.basedir}</workingDirectory>
 						</configuration>
 					</execution>
 				</executions>
