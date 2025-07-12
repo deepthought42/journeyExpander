@@ -194,12 +194,12 @@ public class AuditController {
 				//check if page state is same as original page state. If not then add new ElementInteractionStep 
 				
 				for(Action action: actions) {
-					Step step = new SimpleStep(journey_result_page, 
-												 	leaf_element, 
-												 	action, 
-												 	"",
-												 	null,
-												 	JourneyStatus.CANDIDATE);
+					Step step = new SimpleStep(journey_result_page,
+												leaf_element,
+												action,
+												"",
+												null,
+												JourneyStatus.CANDIDATE);
 					
 					if(existsInJourney(journey, step)) {
 						log.warn("IGNRONING JOURNEY! step already exists within journey");
@@ -231,7 +231,7 @@ public class AuditController {
 					
 					//CREATE NEW JOURNEY
 					Journey expanded_journey = new Journey(steps, JourneyStatus.CANDIDATE);
-					Journey journey_record = journey_service.findByCandidateKey(domain_map.getId(), expanded_journey.getCandidateKey());
+					Journey journey_record = journey_service.findByCandidateKey(expanded_journey.getCandidateKey());
 					
 					if(journey_record != null) {
 						continue;
