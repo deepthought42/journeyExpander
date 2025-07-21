@@ -90,6 +90,18 @@ public class AuditController {
 	@Autowired
 	private PubSubJourneyCandidatePublisherImpl journey_candidate_topic;
 
+	/**
+	 * This method is used to receive a journey from the AuditRecordService and expand it.
+	 * 
+	 * It will then publish the expanded journey to the PubSubJourneyCandidatePublisherImpl.
+	 * 
+	 * @param body
+	 * @return
+	 * @throws JsonMappingException
+	 * @throws JsonProcessingException
+	 * @throws ExecutionException
+	 * @throws InterruptedException
+	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public ResponseEntity<String> receiveMessage(@RequestBody Body body)
 			throws JsonMappingException, JsonProcessingException, ExecutionException, InterruptedException
