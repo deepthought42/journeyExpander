@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/deepthought42/journeyExpander/compare/v1.0.3...v1.0.4) (2025-07-21)
+
+
+### Bug Fixes
+
+* upgrade core to 0.3.21 ([335cec0](https://github.com/deepthought42/journeyExpander/commit/335cec004b93f72d95948e57b39306dd6572435a))
+
 ## [1.0.3](https://github.com/deepthought42/journeyExpander/compare/v1.0.2...v1.0.3) (2025-07-21)
 
 
