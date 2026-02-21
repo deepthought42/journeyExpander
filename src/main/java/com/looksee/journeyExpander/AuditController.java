@@ -146,7 +146,7 @@ public class AuditController {
 			DomainMap domain_map = domain_map_service.findByDomainAuditId(journey_msg.getAuditRecordId());
 			if(domain_map != null) {
 				List<Step> page_steps = step_service.getStepsWithStartPage(journey_result_page, domain_map.getId());
-				if(page_steps.size() > 1) {
+				if(page_steps != null && page_steps.size() > 1) {
 					return new ResponseEntity<String>("RETURNING WITHOUT EXPANSION!!!!  Steps were found that start with page with key"+journey_result_page.getKey(), HttpStatus.OK);
 				}
 			}
@@ -157,7 +157,8 @@ public class AuditController {
 			journey_result_page.setElements(leaf_elements);
 			log.warn(leaf_elements.size()+" leaf elements found for url = "+journey_result_page.getUrl() + " with id = "+journey_result_page.getId());
 			
-			leaf_elements.removeIf(element -> BrowserService.isStructureTag(element.getName())
+			leaf_elements.removeIf(element -> element == null
+							|| BrowserService.isStructureTag(element.getName())
 							|| !ElementStateUtils.isInteractiveElement(element));
 
 			log.warn(leaf_elements.size()+" leaf elements after filtering");
@@ -232,14 +233,23 @@ public class AuditController {
 	 * @return
 	 */
 	private boolean shouldBeExpanded(Journey journey) {
+		if(journey == null || journey.getSteps() == null || journey.getSteps().isEmpty()) {
+			return false;
+		}
+
 		Step last_step = journey.getSteps().get(journey.getSteps().size()-1);
+		if(last_step == null) {
+			return false;
+		}
+
 		if(last_step instanceof LandingStep) {
-			return true;
+			return last_step.getStartPage() != null;
 		}
 		else if(last_step instanceof SimpleStep) {
-			if(!last_step.getStartPage().getKey().contentEquals(last_step.getEndPage().getKey())) {
-				return true;
+			if(last_step.getStartPage() == null || last_step.getEndPage() == null) {
+				return false;
 			}
+			return !last_step.getStartPage().getKey().contentEquals(last_step.getEndPage().getKey());
 		}
 		return false;
 	}
@@ -253,20 +263,29 @@ public class AuditController {
 	 * @return true if step already exists, otherwise false
 	 */
 	private boolean existsInJourney(Journey journey, Step step) {
+		if(journey == null || journey.getSteps() == null || step == null) {
+			return false;
+		}
 		for(Step journey_step : journey.getSteps()) {
 			if(journey_step == null) {
 				continue;
 			}
 			
 			if(step instanceof LandingStep && journey_step instanceof LandingStep) {
-				if(step.getStartPage().getKey().contentEquals(journey_step.getStartPage().getKey())) {
+				if(step.getStartPage() != null
+						&& journey_step.getStartPage() != null
+						&& step.getStartPage().getKey().contentEquals(journey_step.getStartPage().getKey())) {
 					return true;
 				}
 			}
 			else if(step instanceof SimpleStep && journey_step instanceof SimpleStep) {
 				SimpleStep temp1 = (SimpleStep)step;
 				SimpleStep temp2 = (SimpleStep)journey_step;
-				if(temp1.getStartPage().getUrl().contentEquals(temp2.getStartPage().getUrl())
+				if(temp1.getStartPage() != null
+						&& temp2.getStartPage() != null
+						&& temp1.getElementState() != null
+						&& temp2.getElementState() != null
+						&& temp1.getStartPage().getUrl().contentEquals(temp2.getStartPage().getUrl())
 						&& temp1.getElementState().getKey().contentEquals(temp2.getElementState().getKey())
 						&& temp1.getAction().equals(temp2.getAction())
 						&& temp1.getActionInput().contentEquals(temp2.getActionInput())) {
