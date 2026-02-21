@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,6 +133,9 @@ public class AuditController {
 			PageState journey_result_page = last_step instanceof LandingStep ? last_step.getStartPage() : last_step.getEndPage();
 			if(journey_result_page == null) {
 				return new ResponseEntity<String>("Journey result page not found", HttpStatus.BAD_REQUEST);
+			}
+			if(journey_result_page.getUrl() == null || journey_result_page.getUrl().isBlank()) {
+				return new ResponseEntity<String>("Journey result page url not found", HttpStatus.BAD_REQUEST);
 			}
 			
 			Domain domain = domain_service.findByAuditRecord(journey_msg.getAuditRecordId());
@@ -249,7 +253,7 @@ public class AuditController {
 			if(last_step.getStartPage() == null || last_step.getEndPage() == null) {
 				return false;
 			}
-			return !last_step.getStartPage().getKey().contentEquals(last_step.getEndPage().getKey());
+			return !Objects.equals(last_step.getStartPage().getKey(), last_step.getEndPage().getKey());
 		}
 		return false;
 	}
@@ -274,7 +278,7 @@ public class AuditController {
 			if(step instanceof LandingStep && journey_step instanceof LandingStep) {
 				if(step.getStartPage() != null
 						&& journey_step.getStartPage() != null
-						&& step.getStartPage().getKey().contentEquals(journey_step.getStartPage().getKey())) {
+						&& Objects.equals(step.getStartPage().getKey(), journey_step.getStartPage().getKey())) {
 					return true;
 				}
 			}
@@ -285,10 +289,10 @@ public class AuditController {
 						&& temp2.getStartPage() != null
 						&& temp1.getElementState() != null
 						&& temp2.getElementState() != null
-						&& temp1.getStartPage().getUrl().contentEquals(temp2.getStartPage().getUrl())
-						&& temp1.getElementState().getKey().contentEquals(temp2.getElementState().getKey())
-						&& temp1.getAction().equals(temp2.getAction())
-						&& temp1.getActionInput().contentEquals(temp2.getActionInput())) {
+						&& Objects.equals(temp1.getStartPage().getUrl(), temp2.getStartPage().getUrl())
+						&& Objects.equals(temp1.getElementState().getKey(), temp2.getElementState().getKey())
+						&& Objects.equals(temp1.getAction(), temp2.getAction())
+						&& Objects.equals(temp1.getActionInput(), temp2.getActionInput())) {
 					return true;
 				}
 			}
