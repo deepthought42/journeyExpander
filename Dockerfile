@@ -1,31 +1,31 @@
-# Use an official Maven image to build the project
-FROM maven:3.9.6-eclipse-temurin-17 as build
+# syntax=docker/dockerfile:1
 
-# Set the working directory inside the container
-# Set the working directory inside the container
+# Build stage
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy the pom.xml and download dependencies first for faster builds
-COPY pom.xml .
-
-# Copy and run the download script to get the LookseeCore JAR
-COPY scripts/download-core.sh ./scripts/download-core.sh
+# Copy files needed to resolve/build dependencies first for better layer caching
+COPY pom.xml ./
+COPY scripts ./scripts
 RUN chmod +x ./scripts/download-core.sh
-RUN bash ./scripts/download-core.sh
-RUN mvn install:install-file -Dfile=libs/core-0.3.21.jar -DgroupId=com.looksee -DartifactId=core -Dversion=0.3.21 -Dpackaging=jar
 
-# Copy the rest of the project source code
+# Install Looksee core jar used by this service
+RUN bash ./scripts/download-core.sh && \
+    mvn -B install:install-file \
+      -Dfile=libs/core-0.3.21.jar \
+      -DgroupId=com.looksee \
+      -DartifactId=core \
+      -Dversion=0.3.21 \
+      -Dpackaging=jar
+
+# Copy source and package app
 COPY src ./src
+RUN mvn -B clean package -DskipTests
 
-# Build the application
-RUN mvn clean install -DskipTests
-
-# Use a smaller JDK image to run the app
+# Runtime stage
 FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/journeyExpander-*.jar /app/app.jar
 
-# Copy the built JAR file from the previous stage
-COPY --from=build /app/target/*.jar app.jar
-
-EXPOSE 443
-EXPOSE 80
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom", "-Xms256M", "-ea","-jar", "app.jar"]
+EXPOSE 8080
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-Xms256M", "-ea", "-jar", "/app/app.jar"]
