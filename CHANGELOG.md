@@ -1,3 +1,15 @@
+## [1.0.5](https://github.com/deepthought42/journeyExpander/compare/v1.0.4...v1.0.5) (2026-02-21)
+
+
+### Bug Fixes
+
+* address review feedback for payload validation and expansion flow ([a867712](https://github.com/deepthought42/journeyExpander/commit/a8677128d2ce1dc003b328d291ef97c8ad3abf60))
+* harden merged controller null-safety checks ([9062c42](https://github.com/deepthought42/journeyExpander/commit/9062c42e386d0bf0e15b52d73d9ebd8ca8cb14fe))
+* resolve merge null-comparison regressions in controller ([2e4483b](https://github.com/deepthought42/journeyExpander/commit/2e4483bde5ffebeae2c509f326205c9b663a874b))
+* resolve merge regressions in controller and bootstrap ([b491cba](https://github.com/deepthought42/journeyExpander/commit/b491cbaff79bb8953426a7f67f0dd6dabc9a382b))
+* sanitize branch name before docker image tagging ([ee0ba42](https://github.com/deepthought42/journeyExpander/commit/ee0ba42bf52948f9394a84aff5b36f045e364396))
+* unblock docker image build pipeline ([dac8bca](https://github.com/deepthought42/journeyExpander/commit/dac8bcad7d80193389984697ee7a06f964b11349))
+
 ## [1.0.4](https://github.com/deepthought42/journeyExpander/compare/v1.0.3...v1.0.4) (2025-07-21)
 
 
