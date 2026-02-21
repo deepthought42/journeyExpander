@@ -66,7 +66,7 @@ import com.looksee.utils.ElementStateUtils;
 @RestController
 public class AuditController {
 	private static final Logger log = LoggerFactory.getLogger(AuditController.class);
-	private static final ObjectMapper INPUT_MAPPER = new ObjectMapper();
+	private static final ObjectMapper INPUT_MAPPER = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 	private static final JsonMapper OUTPUT_MAPPER = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 	
 	@Autowired
@@ -135,7 +135,11 @@ public class AuditController {
 			}
 			
 			Domain domain = domain_service.findByAuditRecord(journey_msg.getAuditRecordId());
-			if(domain == null || BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl())) {
+			if(domain == null) {
+				log.warn("IGNORING JOURNEY! no domain found for audit record {}", journey_msg.getAuditRecordId());
+				return new ResponseEntity<String>("Domain not found for audit record", HttpStatus.BAD_REQUEST);
+			}
+			if(BrowserUtils.isExternalLink(domain.getUrl(), journey_result_page.getUrl())) {
 				return new ResponseEntity<String>("Last page of journey is external. No further expansion is allowed", HttpStatus.OK);
 			}
 			
@@ -148,10 +152,8 @@ public class AuditController {
 			}
 			
 			List<Action> actions = List.of(Action.CLICK);
-			List<ElementState> leaf_elements = page_state_service.getElementStates(journey_result_page.getId());
-			if(leaf_elements == null) {
-				leaf_elements = new ArrayList<>();
-			}
+			List<ElementState> page_elements = page_state_service.getElementStates(journey_result_page.getId());
+			List<ElementState> leaf_elements = page_elements == null ? new ArrayList<>() : new ArrayList<>(page_elements);
 			journey_result_page.setElements(leaf_elements);
 			log.warn(leaf_elements.size()+" leaf elements found for url = "+journey_result_page.getUrl() + " with id = "+journey_result_page.getId());
 			
