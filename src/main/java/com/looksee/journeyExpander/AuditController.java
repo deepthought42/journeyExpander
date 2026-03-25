@@ -15,9 +15,6 @@ package com.looksee.journeyExpander;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// [START cloudrun_pubsub_handler]
-// [START run_pubsub_handler]
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -63,7 +60,6 @@ import com.looksee.services.StepService;
 import com.looksee.utils.BrowserUtils;
 import com.looksee.utils.ElementStateUtils;
 
-// PubsubController consumes a Pub/Sub message.
 @RestController
 public class AuditController {
 	private static final Logger log = LoggerFactory.getLogger(AuditController.class);
