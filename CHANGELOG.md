@@ -1,3 +1,18 @@
+## [Unreleased]
+
+### Tests
+
+* add comprehensive AuditController unit tests covering all receiveMessage branches, shouldBeExpanded, and existsInJourney
+* add ApplicationTest for Spring Boot entry point
+* add mockito-inline and byte-buddy dependencies for static method mocking
+* add spring-cloud-gcp-pubsub test dependency for PubSub class loading
+* achieve 90%+ code coverage across the codebase
+
+### Documentation
+
+* update README with architecture diagram, testing section, CI/CD, and Docker instructions
+* update CONTRIBUTING with development setup, testing guidelines, and PR workflow
+
 ## [1.0.5](https://github.com/deepthought42/journeyExpander/compare/v1.0.4...v1.0.5) (2026-02-21)
 
 
