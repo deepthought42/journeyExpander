@@ -33,6 +33,21 @@ docs: update README with architecture and testing sections
 3. **Build**: `mvn clean package` (automatically downloads `com.looksee:core` via `scripts/download-core.sh`).
 4. **Run tests**: `mvn test`.
 
+## Design by Contract
+
+This project follows Design by Contract principles:
+
+- **Public methods** validate all inputs and return well-defined error responses.
+- **Private methods** use `assert` statements to enforce preconditions that callers
+  must satisfy. Assertions are enabled at runtime via `-ea` in the Dockerfile.
+- **Javadoc** documents preconditions, postconditions, and parameter constraints
+  for all non-trivial methods.
+
+When contributing new code:
+- Document preconditions and postconditions in Javadoc.
+- Use assertions for internal invariants and preconditions in private methods.
+- Validate external input at system boundaries (controller endpoints).
+
 ## Testing Guidelines
 
 - All new code should include corresponding unit tests.

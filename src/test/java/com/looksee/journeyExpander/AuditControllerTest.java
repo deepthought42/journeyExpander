@@ -500,8 +500,13 @@ class AuditControllerTest {
     // ================================================================
 
     @Test
-    void shouldBeExpandedReturnsFalseForNullJourney() throws Exception {
-        assertFalse(invokeShouldBeExpanded(null));
+    void shouldBeExpandedThrowsAssertionErrorForNullJourney() throws Exception {
+        try {
+            invokeShouldBeExpanded(null);
+            fail("Expected AssertionError");
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            assertInstanceOf(AssertionError.class, e.getCause());
+        }
     }
 
     @Test
@@ -604,14 +609,24 @@ class AuditControllerTest {
     // ================================================================
 
     @Test
-    void existsInJourneyReturnsFalseForNullJourney() throws Exception {
-        assertFalse(invokeExistsInJourney(null, mock(Step.class)));
+    void existsInJourneyThrowsAssertionErrorForNullJourney() throws Exception {
+        try {
+            invokeExistsInJourney(null, mock(Step.class));
+            fail("Expected AssertionError");
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            assertInstanceOf(AssertionError.class, e.getCause());
+        }
     }
 
     @Test
-    void existsInJourneyReturnsFalseForNullStep() throws Exception {
+    void existsInJourneyThrowsAssertionErrorForNullStep() throws Exception {
         Journey journey = mock(Journey.class);
-        assertFalse(invokeExistsInJourney(journey, null));
+        try {
+            invokeExistsInJourney(journey, null);
+            fail("Expected AssertionError");
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            assertInstanceOf(AssertionError.class, e.getCause());
+        }
     }
 
     @Test

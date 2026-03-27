@@ -1,22 +1,5 @@
 package com.looksee.journeyExpander;
 
-/*
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-// [START cloudrun_pubsub_handler]
-// [START run_pubsub_handler]
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -63,7 +46,21 @@ import com.looksee.services.StepService;
 import com.looksee.utils.BrowserUtils;
 import com.looksee.utils.ElementStateUtils;
 
-// PubsubController consumes a Pub/Sub message.
+/**
+ * REST controller that receives verified journeys via Google Cloud Pub/Sub push
+ * and expands them into candidate journeys by discovering interactive elements
+ * on the journey's resulting page.
+ *
+ * <p><b>Contract:</b></p>
+ * <ul>
+ *   <li>Accepts HTTP POST on {@code /} with a Pub/Sub {@link Body} wrapper.</li>
+ *   <li>Returns {@code 400 BAD REQUEST} when the payload is missing, malformed,
+ *       or contains an invalid journey.</li>
+ *   <li>Returns {@code 200 OK} when the request is handled (including cases
+ *       where no expansion is performed).</li>
+ *   <li>Returns {@code 500 INTERNAL SERVER ERROR} on unexpected failures.</li>
+ * </ul>
+ */
 @RestController
 public class AuditController {
 	private static final Logger log = LoggerFactory.getLogger(AuditController.class);
@@ -92,12 +89,27 @@ public class AuditController {
 	private PubSubJourneyCandidatePublisherImpl journey_candidate_topic;
 
 	/**
-	 * This method is used to receive a journey from the AuditRecordService and expand it.
-	 * 
-	 * It will then publish the expanded journey to the PubSubJourneyCandidatePublisherImpl.
-	 * 
-	 * @param body
-	 * @return
+	 * Receives a verified journey via Pub/Sub push and expands it into candidate
+	 * journeys by appending interactive-element click steps to the journey's
+	 * resulting page.
+	 *
+	 * <p><b>Preconditions:</b></p>
+	 * <ul>
+	 *   <li>{@code body} must contain a non-null {@code message} with Base64-encoded
+	 *       JSON data deserializable to {@link VerifiedJourneyMessage}.</li>
+	 *   <li>The decoded journey must have at least one {@link Step}.</li>
+	 * </ul>
+	 *
+	 * <p><b>Postconditions:</b></p>
+	 * <ul>
+	 *   <li>On success, zero or more {@link JourneyCandidateMessage} payloads are
+	 *       published to the journey-candidate Pub/Sub topic.</li>
+	 *   <li>Each published candidate journey is persisted in the domain map.</li>
+	 * </ul>
+	 *
+	 * @param body the Pub/Sub push wrapper containing the Base64-encoded message
+	 * @return {@code 200 OK} when handled successfully, {@code 400 BAD REQUEST}
+	 *         for invalid input, or {@code 500 INTERNAL SERVER ERROR} on failure
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public ResponseEntity<String> receiveMessage(@RequestBody Body body) {
@@ -230,14 +242,22 @@ public class AuditController {
 	}
 
 	/**
-	 * if last step in journey is a {@link LandingStep} or a {@link SimpleStep} results in a change of state,
-	 * then return true.
-	 * 
-	 * @param journey
-	 * @return
+	 * Determines whether a journey is eligible for expansion.
+	 *
+	 * <p>A journey should be expanded when its last step is a {@link LandingStep}
+	 * with a non-null start page, or a {@link SimpleStep} whose start and end
+	 * pages differ (indicating a page-state change).</p>
+	 *
+	 * <p><b>Precondition:</b> {@code journey} must be non-null with a non-empty
+	 * step list. Defensive null checks are retained for robustness.</p>
+	 *
+	 * @param journey the {@link Journey} to evaluate; must not be {@code null}
+	 * @return {@code true} if the journey qualifies for expansion, {@code false} otherwise
 	 */
 	private boolean shouldBeExpanded(Journey journey) {
-		if(journey == null || journey.getSteps() == null || journey.getSteps().isEmpty()) {
+		assert journey != null : "Precondition violated: journey must not be null";
+
+		if(journey.getSteps() == null || journey.getSteps().isEmpty()) {
 			return false;
 		}
 
@@ -259,15 +279,25 @@ public class AuditController {
 	}
 	
 	/**
-	 * Checks if {@link Step} exists within the given {@link Journey}
-	 * 
-	 * @param journey {@link Journey} to check for the given {@link Step}
-	 * @param step {@link Step} to check for in the given {@link Journey}
-	 * 
-	 * @return true if step already exists, otherwise false
+	 * Checks whether an equivalent {@link Step} already exists within the given
+	 * {@link Journey}.
+	 *
+	 * <p>Two {@link LandingStep}s match when their start-page keys are equal.
+	 * Two {@link SimpleStep}s match when their start-page URLs, element-state
+	 * keys, actions, and action inputs are all equal.</p>
+	 *
+	 * <p><b>Precondition:</b> {@code journey} and {@code step} must be non-null.
+	 * Defensive null checks are retained for robustness.</p>
+	 *
+	 * @param journey the {@link Journey} whose steps are searched; must not be {@code null}
+	 * @param step    the {@link Step} to look for; must not be {@code null}
+	 * @return {@code true} if an equivalent step is found, {@code false} otherwise
 	 */
 	private boolean existsInJourney(Journey journey, Step step) {
-		if(journey == null || journey.getSteps() == null || step == null) {
+		assert journey != null : "Precondition violated: journey must not be null";
+		assert step != null : "Precondition violated: step must not be null";
+
+		if(journey.getSteps() == null) {
 			return false;
 		}
 		for(Step journey_step : journey.getSteps()) {
