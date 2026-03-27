@@ -67,6 +67,28 @@ Expansion is skipped when:
 - Steps already exist in the domain map for the resulting page.
 - A candidate step or journey with the same key already exists (deduplication).
 
+## Design by Contract
+
+This service follows Design by Contract principles. Java assertions (`-ea`) are
+enabled in the production Docker image.
+
+### `AuditController.receiveMessage(Body)`
+- **Precondition**: `body` contains a non-null `message` with Base64-encoded JSON
+  data deserializable to `VerifiedJourneyMessage`. The decoded journey must have
+  at least one `Step`.
+- **Postcondition**: On success, zero or more `JourneyCandidateMessage` payloads
+  are published and each candidate journey is persisted in the domain map.
+
+### `AuditController.shouldBeExpanded(Journey)` *(private)*
+- **Precondition**: `journey` is non-null (enforced by assertion).
+- **Postcondition**: Returns `true` only when the last step indicates a navigable
+  page-state change.
+
+### `AuditController.existsInJourney(Journey, Step)` *(private)*
+- **Precondition**: Both `journey` and `step` are non-null (enforced by assertion).
+- **Postcondition**: Returns `true` if and only if an equivalent step (matching
+  page key, element key, action, and input) exists in the journey.
+
 ## Build and run
 ### Prerequisites
 - Java 17+
@@ -100,10 +122,9 @@ Coverage reports are generated at `target/site/jacoco/index.html`.
 | `ApplicationTest` | Spring Boot entry point |
 
 ## Configuration
-Main config files:
-- `src/main/resources/application.properties` — server port, GCP Pub/Sub settings
-- `src/main/resources/application.yml` — Resilience4j retry policies (WebDriver, Neo4j, GCP, builder)
-- `src/main/resources/logback.xml` — logging configuration (root level: WARN)
+
+Configuration file:
+- `src/main/resources/application.properties` — server port, GCP Pub/Sub settings, Neo4j logging level
 
 Configure GCP project and Pub/Sub topic values using properties or environment overrides for your deployment environment.
 
@@ -117,10 +138,10 @@ Configure GCP project and Pub/Sub topic values using properties or environment o
 
 ```bash
 docker build -t journey-expander .
-docker run -p 8080:8080 -Xms256m journey-expander
+docker run -p 8080:8080 journey-expander
 ```
 
-The multi-stage Dockerfile uses Maven 3.9.6 + Eclipse Temurin 17 for building and Temurin 17 JRE for the runtime image.
+The multi-stage Dockerfile uses Maven 3.9.6 + Eclipse Temurin 17 for building and Temurin 17 JRE for the runtime image. Assertions are enabled at runtime via the `-ea` JVM flag.
 
 ## Development
 - Commit style follows Conventional Commits (see `CONTRIBUTING.md`).
